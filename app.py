@@ -5,15 +5,15 @@ import google.generativeai as genai
 st.set_page_config(page_title="pali-AIระบบวิเคราะห์บาลีไวยากรณ์ AI", page_icon="🙏", layout="centered")
 
 # --- ส่วนจัดการ API Key ปลอดภัย ---
-st.sidebar.header("")
+
 if "GEMINI_API_KEY" in st.secrets:
     API_KEY = st.secrets["GEMINI_API_KEY"]
 else:
     API_KEY = st.sidebar.text_input("ระบุ Gemini API Key ของคุณ", type="password", help="รับ API Key ฟรีได้ที่ Google AI Studio")
 
 # --- ส่วนหน้าตาเว็บ (UI) ---
-st.markdown("<h1 style='text-align: center; color: #b45309;'>ระบบวิเคราะห์และแปลบาลีไวยากรณ์</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-weight: bold;'>เพื่อการศึกษาพระปริยัติธรรม ถวายเป็นพุทธบูชาเนื่องในวันวิสาขบูชา</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #b45309;'>ระบบpali-AIวิเคราะห์และแปลบาลีไวยากรณ์</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-weight: bold;'>เพื่อการศึกษาพระปริยัติธรรมตามพระราชดำริ ถวายเป็นพุทธบูชาเนื่องในวันวิสาขบูชา</p>", unsafe_allow_html=True)
 st.divider()
 
 st.subheader("📝 กรอกประโยคหรือศัพท์บาลี")
