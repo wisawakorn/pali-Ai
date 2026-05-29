@@ -2,10 +2,10 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- การตั้งค่าหน้าจอ ---
-st.set_page_config(page_title="ระบบวิเคราะห์บาลีไวยากรณ์ AI", page_icon="🙏", layout="centered")
+st.set_page_config(page_title="pali-AIระบบวิเคราะห์บาลีไวยากรณ์ AI", page_icon="🙏", layout="centered")
 
 # --- ส่วนจัดการ API Key ปลอดภัย ---
-st.sidebar.header("⚙️ การตั้งค่าระบบ")
+st.sidebar.header("")
 if "GEMINI_API_KEY" in st.secrets:
     API_KEY = st.secrets["GEMINI_API_KEY"]
 else:
