@@ -23,7 +23,7 @@ if not API_KEY:
 else:
     genai.configure(api_key=API_KEY)
     # แก้ไขชื่อโมเดลเป็นรุ่นล่าสุดที่รองรับ
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
     st.write("### 📝 กรอกประโยคหรือคำศัพท์ที่ต้องการสืบค้น")
     user_input = st.text_input("พิมพ์บาลีเพื่อแปล หรือพิมพ์ไทยเพื่อค้นธรรมะ", placeholder="ตัวอย่าง: ปุริโส คามํ คจฺฉติ หรือ อริยสัจ 4 คืออะไร")
