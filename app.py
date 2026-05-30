@@ -4,35 +4,20 @@ import google.generativeai as genai
 # 1. ตั้งค่าหน้าเว็บให้สะอาดและจัดองค์ประกอบกึ่งกลาง
 st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี", page_icon="🙏", layout="centered")
 
-# 2. ปรับแต่งโครงสร้าง CSS ให้เนียนและได้สัดส่วนตามภาพตัวอย่างสีครีม-ทอง
+# 2. ปรับแต่งโครงสร้าง CSS ให้เนียนตามธีมสีครีม-ทอง
 st.markdown("""
     <style>
-    /* ตั้งค่าพื้นหลังและฟอนต์ภาพรวม */
     .stApp {
         background-color: #f7f4eb !important;
     }
     
-    /* แถบหัวข้อลิขสิทธิ์ด้านบนสุด */
-    .top-header {
-        text-align: center;
-        background-color: #fcf9f2;
-        border: 1px solid #e1d7c1;
-        padding: 12px;
-        border-radius: 8px;
-        font-size: 15px;
-        color: #704d2b;
-        margin-bottom: 30px;
-        font-weight: 500;
-        box-shadow: 0px 2px 4px rgba(0,0,0,0.02);
-    }
-
-    /* หัวข้อหลัก AI.prapali จัดกึ่งกลางเด่นสง่า */
+    /* หัวข้อหลัก AI.prapali */
     .main-title { 
         color: #704d2b; 
         font-size: 64px; 
         font-weight: bold; 
         text-align: center; 
-        margin-top: 10px;
+        margin-top: 20px;
         margin-bottom: 5px; 
         letter-spacing: 1px;
     }
@@ -40,18 +25,18 @@ st.markdown("""
         font-size: 18px; 
         text-align: center; 
         color: #5a5a5a; 
-        margin-bottom: 35px;
+        margin-bottom: 30px;
         font-weight: 500;
     }
     
-    /* กล่องข้อความปรารภจากผู้จัดทำนวัตกรรม (จัดสัดส่วนตามภาพตัวอย่าง) */
+    /* กล่องข้อความปรารภจากผู้จัดทำนวัตกรรม */
     .creator-box {
         background-color: #ffffff;
         border: 1px solid #e1d7c1;
         padding: 30px;
         border-radius: 16px;
         box-shadow: 0px 4px 16px rgba(112,77,43,0.05);
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
     .creator-title { 
         color: #704d2b; 
@@ -59,7 +44,6 @@ st.markdown("""
         font-size: 32px; 
         margin-bottom: 20px; 
         text-align: center; 
-        letter-spacing: 0.5px;
     }
     .creator-text { 
         color: #2b2b2b; 
@@ -68,61 +52,37 @@ st.markdown("""
         text-align: justify;
     }
     
-    /* กล่องประดิษฐานพระบรมราโชวาทและพระราชปณิธาน */
+    /* กล่องพระบรมราโชวาท */
     .royal-card { 
         background-color: #fcf9f2; 
         border: 1px solid #e1d7c1;
         border-left: 6px solid #c5a85c; 
         padding: 25px; 
         border-radius: 12px; 
-        margin-bottom: 35px;
-        box-shadow: 0px 2px 8px rgba(0,0,0,0.01);
+        margin-bottom: 30px;
     }
-    .royal-header { 
-        color: #704d2b; 
-        font-weight: bold; 
-        font-size: 18px; 
-        margin-bottom: 10px; 
-    }
-    .royal-body { 
-        color: #3a3a3a; 
-        font-size: 15.5px; 
-        line-height: 1.7; 
-        text-align: justify; 
-    }
-    
-    /* ปรับแต่งช่องกรอกข้อมูลค้นหาให้เข้ากับธีม */
-    .stTextInput div div input {
-        background-color: #ffffff !important;
-        border: 1px solid #e1d7c1 !important;
-        color: #2b2b2b !important;
-        border-radius: 8px !important;
-        padding: 12px !important;
-    }
-    .stTextInput div div input:focus {
-        border-color: #c5a85c !important;
-        box-shadow: 0 0 0 1px #c5a85c !important;
-    }
-    
-    /* ส่วนท้ายเว็บ */
+    .royal-header { color: #704d2b; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+    .royal-body { color: #3a3a3a; font-size: 15.5px; line-height: 1.7; text-align: justify; }
+
+    /* ส่วนท้ายเว็บ (ตำแหน่งใหม่ตามคำสั่ง) */
     .footer-container { 
         text-align: center; 
         color: #704d2b; 
         font-size: 14px; 
         margin-top: 50px; 
-        padding-top: 20px;
+        padding: 20px;
         border-top: 1px solid #e1d7c1;
+        background-color: #fcf9f2;
+        border-radius: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ─── ส่วนหัวและแถบลิขสิทธิ์ ───
-st.markdown('<div class="top-header">© 2026 AI.prapali - All Rights Reserved | ถวายเป็นพุทธบูชา 🙏</div>', unsafe_allow_html=True)
-
+# ─── ส่วนหัวข้อระบบ ───
 st.markdown('<p class="main-title">AI.prapali</p>', unsafe_allow_html=True)
 st.markdown('<p class="main-subtitle">นวัตกรรมปัญญาประดิษฐ์เพื่อการวิเคราะห์แปลไวยากรณ์บาลีและสืบค้นพระธรรมคัมภีร์</p>', unsafe_allow_html=True)
 
-# ─── กล่องข้อความปรารภของผู้จัดทำ ───
+# ─── ข้อความปรารภของผู้จัดทำ (นำมาต่อที่นี่ตามคำสั่ง) ───
 st.markdown("""
     <div class="creator-box">
         <div class="creator-title">ข้อความปรารภจากผู้จัดทำนวัตกรรม</div>
@@ -135,7 +95,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# ─── กล่องประดิษฐานพระบรมราโชวาทและพระราชปณิธาน ───
+# ─── กล่องพระบรมราโชวาท ───
 st.markdown("""
     <div class="royal-card">
         <div class="royal-header">📜 พระบรมราโชวาท และพระราชปณิธานด้านการศึกษาพระปริยัติธรรม</div>
@@ -147,44 +107,30 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# ─── ระบบสืบค้นและเชื่อมต่อ API ───
+# ─── ระบบสืบค้น ───
 API_KEY = st.secrets.get("GEMINI_API_KEY")
 
-if not API_KEY:
-    st.error("⚠️ ไม่พบรหัส API Key กรุณาตั้งค่า GEMINI_API_KEY ในระบบ Secrets ของ Streamlit")
-else:
+if API_KEY:
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash')
-
-    # ช่องรับข้อมูลหลัก จัดวางต่อจากส่วนคำปรารภและพระบรมราโชวาทอย่างลงตัว
+    model = genai.GenerativeModel('gemini-1.5-flash')
     user_input = st.text_input(
         "💬 สอบถามระบบถาม-ตอบพระบาลีและพระไตรปิฎกอรรถกถาได้ที่นี่:", 
-        placeholder="พิมพ์ภาษาบาลีเพื่อแปลแยกธาตุปัจจัย หรือพิมพ์ภาษาไทยเพื่อค้นคว้าหลักธรรม..."
+        placeholder="พิมพ์ภาษาบาลีเพื่อแปล หรือพิมพ์ภาษาไทยเพื่อค้นคว้าหลักธรรม..."
     )
-
     if user_input:
-        with st.spinner("กำลังสืบค้นและประมวลผลจากคัมภีร์..."):
-            buddha_prompt = f"""
-            คุณคือ AI.prapali ผู้เชี่ยวชาญระดับสูงด้านภาษาบาลี คัมภีร์พระไตรปิฎก และพระพุทธศาสนา
-            จงทำหน้าที่วิเคราะห์ข้อความต่อไปนี้:
-            1. หากเป็นภาษาบาลี: ให้ทำการแปลยกศัพท์ วิเคราะห์วิภัตติปัจจัย แยกธาตุ ปัจจัย ตัดสนธิ-สมาส ตามหลักบาลีสนามหลวงอย่างแม่นยำ
-            2. หากเป็นภาษาไทย/คำถามธรรมะ: ให้สืบค้นอธิบายหลักธรรมตามคัมภีร์พระไตรปิฎกและอรรถกถาอย่างถูกต้องและสุภาพ
-            
-            ⚠️ ข้อบังคับเด็ดขาด (Security Guard): ห้ามตอบเรื่องทางโลกที่ไม่เกี่ยวข้องกับพระพุทธศาสนา พระธรรม พระสงฆ์ หรือภาษาบาลีเด็ดขาด หากพบให้ปฏิเสธอย่างสุภาพทันที
-            
-            ข้อความจากผู้ใช้: {user_input}
-            """
-            
+        with st.spinner("กำลังประมวลผล..."):
             try:
-                response = model.generate_content(buddha_prompt)
-                st.markdown("### 📝 ผลการประมวลผลระบบ:")
+                response = model.generate_content(f"ในฐานะ AI.prapali จงตอบคำถามนี้ตามหลักการทางพระพุทธศาสนา: {user_input}")
+                st.markdown("### 📝 ผลการประมวลผล:")
                 st.write(response.text)
             except Exception as e:
-                st.error(f"เกิดข้อผิดพลาดในการประมวลผล: {str(e)}")
+                st.error("เกิดข้อผิดพลาดในการเชื่อมต่อ")
+else:
+    st.error("⚠️ กรุณาตั้งค่า API Key")
 
-# ─── ส่วนท้ายหน้าเว็บ ───
+# ─── ส่วนท้ายหน้าเว็บ (ย้ายมาไว้ข้างล่างเหมือนเดิม) ───
 st.markdown("""
     <div class="footer-container">
-        <p>ถวายเป็นพุทธบูชา 🙏</p>
+        © 2026 AI.prapali - All Rights Reserved | ถวายเป็นพุทธบูชา 🙏
     </div>
 """, unsafe_allow_html=True)
