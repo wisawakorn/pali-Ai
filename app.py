@@ -1,7 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. ตั้งค่าหน้าเว็บให้สะอาดและกว้างขวางแบบมินิมอล
+# 1. ตั้งค่าหน้าเว็บให้สะอาดแบบมินิมอลและจัดองค์ประกอบกึ่งกลาง
 st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี", page_icon="🙏", layout="centered")
 
 # 2. ปรับแต่งสไตล์ (CSS) จัดกึ่งกลางรูปภาพและขยายขนาดหัวข้อ
@@ -14,18 +14,20 @@ st.markdown("""
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 20px;
-        margin-bottom: 10px;
+        margin-top: 10px;
+        margin-bottom: 15px;
     }
     .buddha-logo {
-        border-radius: 10px;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
+        max-width: 100%;
+        height: auto;
     }
 
-    /* หัวข้อหลัก AI.prapali ตัวใหญ่เด่นชัด */
+    /* หัวข้อหลัก AI.prapali ขยายตัวใหญ่เด่นชัด */
     .main-title { 
         color: #8B5A2B; 
-        font-size: 52px; 
+        font-size: 56px; /* ปรับขนาดให้ใหญ่และสง่างาม */
         font-weight: bold; 
         text-align: center; 
         margin-top: 5px;
@@ -69,9 +71,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. ประดิษฐานรูปพระพุทธปฏิมากรของอาจารย์ (ครอบเจาะจงเฉพาะองค์พระสีขาว) ไว้กึ่งกลางด้านบนสุด
+# 3. ประดิษฐานรูปพระพุทธปฏิมากรองค์สีขาวที่ตัดแต่งแล้วไว้กึ่งกลางด้านบนสุด
 st.markdown(
-    '<div class="image-container"><img class="buddha-logo" src="https://i.imgur.com/g886S1h.png" width="180"></div>', 
+    '<div class="image-container"><img class="buddha-logo" src="https://i.imgur.com/GZpW3iA.png" width="320"></div>', 
     unsafe_allow_html=True
 )
 
@@ -100,7 +102,7 @@ else:
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel('gemini-2.5-flash')
 
-    # ช่องพิมพ์รับข้อมูลสไตล์ Gemini
+    # ช่องพิมพ์รับข้อมูลสไตล์เดียวกับเว็บบราวเซอร์ชั้นนำ
     user_input = st.text_input(
         "💬 สอบถามระบบถาม-ตอบพระบาลีและพระไตรปิฎกอรรถกถาได้ที่นี่:", 
         placeholder="พิมพ์ภาษาบาลีเพื่อแปลแยกธาตุปัจจัย หรือพิมพ์ภาษาไทยเพื่อค้นคว้าหลักธรรม..."
