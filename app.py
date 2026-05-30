@@ -1,83 +1,128 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. ตั้งค่าหน้าเว็บให้สะอาดแบบมินิมอลและจัดองค์ประกอบกึ่งกลาง
+# 1. ตั้งค่าหน้าเว็บให้สะอาดและจัดองค์ประกอบกึ่งกลาง
 st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี", page_icon="🙏", layout="centered")
 
-# 2. ปรับแต่งสไตล์ (CSS) ตามธีมรูปภาพของผู้กอง (เน้นโทนสีน้ำตาล-ทอง สง่างาม)
+# 2. ปรับแต่งโครงสร้าง CSS ให้เนียนและได้สัดส่วนตามภาพตัวอย่างสีครีม-ทอง
 st.markdown("""
     <style>
-    body { background-color: #faf8f5; }
+    /* ตั้งค่าพื้นหลังและฟอนต์ภาพรวม */
+    .stApp {
+        background-color: #f7f4eb !important;
+    }
     
-    /* แถบหัวข้อลิขสิทธิ์ด้านบนสุดตามแบบภาพ */
+    /* แถบหัวข้อลิขสิทธิ์ด้านบนสุด */
     .top-header {
         text-align: center;
-        background-color: #FFFBF0;
-        border: 1px solid #E6D5B8;
-        padding: 10px;
+        background-color: #fcf9f2;
+        border: 1px solid #e1d7c1;
+        padding: 12px;
         border-radius: 8px;
-        font-size: 14px;
-        color: #8B5A2B;
-        margin-bottom: 25px;
+        font-size: 15px;
+        color: #704d2b;
+        margin-bottom: 30px;
         font-weight: 500;
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.02);
     }
 
-    /* หัวข้อหลัก AI.prapali ใหญ่เด่นสง่า */
+    /* หัวข้อหลัก AI.prapali จัดกึ่งกลางเด่นสง่า */
     .main-title { 
-        color: #8B5A2B; 
-        font-size: 72px; 
+        color: #704d2b; 
+        font-size: 64px; 
         font-weight: bold; 
         text-align: center; 
         margin-top: 10px;
         margin-bottom: 5px; 
-        letter-spacing: 2px;
+        letter-spacing: 1px;
     }
-    .main-subtitle { font-size: 18px; text-align: center; color: #666666; margin-bottom: 30px; }
+    .main-subtitle { 
+        font-size: 18px; 
+        text-align: center; 
+        color: #5a5a5a; 
+        margin-bottom: 35px;
+        font-weight: 500;
+    }
     
-    /* กล่องข้อความปรารภจากผู้จัดทำนวัตกรรม (เด่นตรงกลางตามแบบ) */
+    /* กล่องข้อความปรารภจากผู้จัดทำนวัตกรรม (จัดสัดส่วนตามภาพตัวอย่าง) */
     .creator-box {
         background-color: #ffffff;
-        border: 1px solid #E6D5B8;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.03);
-        margin-bottom: 25px;
+        border: 1px solid #e1d7c1;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0px 4px 16px rgba(112,77,43,0.05);
+        margin-bottom: 30px;
     }
-    .creator-title { color: #5C3A21; font-weight: bold; font-size: 26px; margin-bottom: 15px; text-align: center; }
-    .creator-text { color: #333333; font-size: 15px; line-height: 1.8; text-align: justify; }
+    .creator-title { 
+        color: #704d2b; 
+        font-weight: bold; 
+        font-size: 32px; 
+        margin-bottom: 20px; 
+        text-align: center; 
+        letter-spacing: 0.5px;
+    }
+    .creator-text { 
+        color: #2b2b2b; 
+        font-size: 16px; 
+        line-height: 1.8; 
+        text-align: justify;
+    }
     
-    /* กล่องพระบรมราโชวาทและพระราชปณิธาน */
+    /* กล่องประดิษฐานพระบรมราโชวาทและพระราชปณิธาน */
     .royal-card { 
-        background-color: #FFFBF0; 
-        border: 1px solid #E6D5B8;
-        border-left: 5px solid #D4AF37; 
-        padding: 20px; 
-        border-radius: 8px; 
-        margin-bottom: 25px;
+        background-color: #fcf9f2; 
+        border: 1px solid #e1d7c1;
+        border-left: 6px solid #c5a85c; 
+        padding: 25px; 
+        border-radius: 12px; 
+        margin-bottom: 35px;
+        box-shadow: 0px 2px 8px rgba(0,0,0,0.01);
     }
-    .royal-header { color: #8B6508; font-weight: bold; font-size: 16px; margin-bottom: 8px; }
-    .royal-body { color: #444444; font-size: 14.5px; line-height: 1.6; text-align: justify; }
+    .royal-header { 
+        color: #704d2b; 
+        font-weight: bold; 
+        font-size: 18px; 
+        margin-bottom: 10px; 
+    }
+    .royal-body { 
+        color: #3a3a3a; 
+        font-size: 15.5px; 
+        line-height: 1.7; 
+        text-align: justify; 
+    }
+    
+    /* ปรับแต่งช่องกรอกข้อมูลค้นหาให้เข้ากับธีม */
+    .stTextInput div div input {
+        background-color: #ffffff !important;
+        border: 1px solid #e1d7c1 !important;
+        color: #2b2b2b !important;
+        border-radius: 8px !important;
+        padding: 12px !important;
+    }
+    .stTextInput div div input:focus {
+        border-color: #c5a85c !important;
+        box-shadow: 0 0 0 1px #c5a85c !important;
+    }
     
     /* ส่วนท้ายเว็บ */
     .footer-container { 
         text-align: center; 
-        color: #8B5A2B; 
+        color: #704d2b; 
         font-size: 14px; 
-        margin-top: 40px; 
-        padding-top: 15px;
-        border-top: 1px solid #EAEAEA;
+        margin-top: 50px; 
+        padding-top: 20px;
+        border-top: 1px solid #e1d7c1;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# แสดงแถบลิขสิทธิ์และคำถวายพุทธบูชาด้านบนสุดตามแบบรูปภาพ
+# ─── ส่วนหัวและแถบลิขสิทธิ์ ───
 st.markdown('<div class="top-header">© 2026 AI.prapali - All Rights Reserved | ถวายเป็นพุทธบูชา 🙏</div>', unsafe_allow_html=True)
 
-# แสดงหัวข้อแบรนด์ใหญ่พิเศษเด่นชัด
 st.markdown('<p class="main-title">AI.prapali</p>', unsafe_allow_html=True)
 st.markdown('<p class="main-subtitle">นวัตกรรมปัญญาประดิษฐ์เพื่อการวิเคราะห์แปลไวยากรณ์บาลีและสืบค้นพระธรรมคัมภีร์</p>', unsafe_allow_html=True)
 
-# ─── กล่องข้อความปรารภของผู้จัดทำ (ขึ้นก่อนตามแบบรูปภาพ) ───
+# ─── กล่องข้อความปรารภของผู้จัดทำ ───
 st.markdown("""
     <div class="creator-box">
         <div class="creator-title">ข้อความปรารภจากผู้จัดทำนวัตกรรม</div>
@@ -102,16 +147,16 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# ดึงรหัส API Key จากระบบ Secrets ของ Streamlit
+# ─── ระบบสืบค้นและเชื่อมต่อ API ───
 API_KEY = st.secrets.get("GEMINI_API_KEY")
 
 if not API_KEY:
     st.error("⚠️ ไม่พบรหัส API Key กรุณาตั้งค่า GEMINI_API_KEY ในระบบ Secrets ของ Streamlit")
 else:
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
-    # ช่องพิมพ์รับข้อมูล/ระบบค้นหาหลัก
+    # ช่องรับข้อมูลหลัก จัดวางต่อจากส่วนคำปรารภและพระบรมราโชวาทอย่างลงตัว
     user_input = st.text_input(
         "💬 สอบถามระบบถาม-ตอบพระบาลีและพระไตรปิฎกอรรถกถาได้ที่นี่:", 
         placeholder="พิมพ์ภาษาบาลีเพื่อแปลแยกธาตุปัจจัย หรือพิมพ์ภาษาไทยเพื่อค้นคว้าหลักธรรม..."
@@ -137,7 +182,7 @@ else:
             except Exception as e:
                 st.error(f"เกิดข้อผิดพลาดในการประมวลผล: {str(e)}")
 
-# ส่วนท้ายหน้าเว็บตามที่ปรากฏในรูปภาพ
+# ─── ส่วนท้ายหน้าเว็บ ───
 st.markdown("""
     <div class="footer-container">
         <p>ถวายเป็นพุทธบูชา 🙏</p>
