@@ -97,7 +97,7 @@ API_KEY = st.secrets.get("GEMINI_API_KEY")
 
 if API_KEY:
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     user_input = st.text_input(
         "💬 สอบถามระบบถาม-ตอบพระบาลีและพระไตรปิฎกอรรถกถาได้ที่นี่:", 
         placeholder="พิมพ์ภาษาบาลีเพื่อแปล หรือพิมพ์ภาษาไทยเพื่อค้นคว้าหลักธรรม..."
