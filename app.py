@@ -27,7 +27,7 @@ st.markdown("""
     /* หัวข้อหลัก AI.prapali ขยายตัวใหญ่เด่นชัด */
     .main-title { 
         color: #8B5A2B; 
-        font-size: 56px; /* ปรับขนาดให้ใหญ่และสง่างาม */
+        font-size: 56px; 
         font-weight: bold; 
         text-align: center; 
         margin-top: 5px;
@@ -71,9 +71,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. ประดิษฐานรูปพระพุทธปฏิมากรองค์สีขาวที่ตัดแต่งแล้วไว้กึ่งกลางด้านบนสุด
+# 3. ประดิษฐานรูปพระพุทธปฏิมากรองค์สีขาวที่ตัดแต่งแล้วไว้กึ่งกลางด้านบนสุด (แก้ไขลิงก์ให้เสถียรภาพถาวร)
 st.markdown(
-    '<div class="image-container"><img class="buddha-logo" src="https://i.imgur.com/GZpW3iA.png" width="320"></div>', 
+    '<div class="image-container"><img class="buddha-logo" src="https://images.unsplash.com/photo-1628135114774-72b2257257cf?q=80&w=400" width="320"></div>', 
     unsafe_allow_html=True
 )
 
