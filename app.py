@@ -4,37 +4,23 @@ import google.generativeai as genai
 # 1. ตั้งค่าหน้าเว็บให้สะอาดแบบมินิมอลและจัดองค์ประกอบกึ่งกลาง
 st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี", page_icon="🙏", layout="centered")
 
-# 2. ปรับแต่งสไตล์ (CSS) จัดกึ่งกลางรูปภาพและขยายขนาดหัวข้อ
+# 2. ปรับแต่งสไตล์ (CSS) ขยายขนาดหัวข้อให้ใหญ่เด่นชัดเป็นพิเศษ
 st.markdown("""
     <style>
     body { background-color: #faf8f5; }
-    
-    /* จัดการรูปสัญลักษณ์พระพุทธรูปให้อยู่ตรงกลางอย่างสง่างาม */
-    .image-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 10px;
-        margin-bottom: 15px;
-    }
-    .buddha-logo {
-        border-radius: 12px;
-        box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
-        max-width: 100%;
-        height: auto;
-    }
 
-    /* หัวข้อหลัก AI.prapali ขยายตัวใหญ่เด่นชัด */
+    /* หัวข้อหลัก AI.prapali ขยายขนาดใหญ่พิเศษ (72px) ตามความประสงค์ */
     .main-title { 
         color: #8B5A2B; 
-        font-size: 56px; 
+        font-size: 72px; /* ขยายใหญ่ขึ้นจากเดิมเพื่อให้เด่นสง่าที่สุด */
         font-weight: bold; 
         text-align: center; 
-        margin-top: 5px;
+        margin-top: 30px;
         margin-bottom: 5px; 
-        letter-spacing: 1px;
+        letter-spacing: 2px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
     }
-    .main-subtitle { font-size: 16px; text-align: center; color: #666666; margin-bottom: 25px; }
+    .main-subtitle { font-size: 18px; text-align: center; color: #666666; margin-bottom: 30px; }
     
     /* กล่องพระราชปณิธานด้านการศึกษาปริยัติธรรม */
     .royal-card { 
@@ -71,13 +57,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. ประดิษฐานรูปพระพุทธปฏิมากรองค์สีขาวที่ตัดแต่งแล้วไว้กึ่งกลางด้านบนสุด (แก้ไขลิงก์ให้เสถียรภาพถาวร)
-st.markdown(
-    '<div class="image-container"><img class="buddha-logo" src="https://images.unsplash.com/photo-1628135114774-72b2257257cf?q=80&w=400" width="320"></div>', 
-    unsafe_allow_html=True
-)
-
-# แสดงหัวข้อระบบขนาดใหญ่เด่นชัดใต้รูปภาพ
+# แสดงหัวข้อระบบขนาดใหญ่พิเศษเด่นชัด
 st.markdown('<p class="main-title">AI.prapali</p>', unsafe_allow_html=True)
 st.markdown('<p class="main-subtitle">นวัตกรรมปัญญาประดิษฐ์เพื่อการวิเคราะห์แปลไวยากรณ์บาลีและสืบค้นพระธรรมคัมภีร์</p>', unsafe_allow_html=True)
 
