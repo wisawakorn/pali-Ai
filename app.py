@@ -4,19 +4,31 @@ import google.generativeai as genai
 # 1. ตั้งค่าหน้าเว็บให้สะอาดและกว้างขวางแบบมินิมอล
 st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี", page_icon="🙏", layout="centered")
 
-# 2. ปรับแต่งสไตล์ (CSS) ขยายหัวข้อและปรับแต่งองค์ประกอบให้สมภาคภูมิ
+# 2. ปรับแต่งสไตล์ (CSS) จัดกึ่งกลางรูปภาพและขยายขนาดหัวข้อ
 st.markdown("""
     <style>
-    /* ตั้งค่าฟอนต์และพื้นหลัง */
     body { background-color: #faf8f5; }
     
-    /* ขยายขนาดหัวข้อหลักตามความประสงค์ */
+    /* จัดการรูปสัญลักษณ์พระพุทธรูปให้อยู่ตรงกลางอย่างสง่างาม */
+    .image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    .buddha-logo {
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* หัวข้อหลัก AI.prapali ตัวใหญ่เด่นชัด */
     .main-title { 
         color: #8B5A2B; 
-        font-size: 52px; /* ขยายขนาดตัวอักษรให้ใหญ่เด่นชัด */
+        font-size: 52px; 
         font-weight: bold; 
         text-align: center; 
-        margin-top: 10px;
+        margin-top: 5px;
         margin-bottom: 5px; 
         letter-spacing: 1px;
     }
@@ -41,9 +53,8 @@ st.markdown("""
         padding: 20px;
         border-radius: 8px;
         margin-top: 25px;
-        text-align: center;
     }
-    .creator-title { color: #8B5A2B; font-weight: bold; font-size: 15px; margin-bottom: 8px; }
+    .creator-title { color: #8B5A2B; font-weight: bold; font-size: 15px; margin-bottom: 8px; text-align: center; }
     .creator-text { color: #444444; font-size: 14px; line-height: 1.6; text-align: justify; text-justify: inter-word; }
     
     /* ส่วนท้ายเว็บ */
@@ -58,15 +69,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. ประดิษฐานรูปพระพุทธปฏิมากรโทนสีขาวสไตล์ศิลปะร่วมสมัยด้านบนสุดเพื่อเป็นสัญลักษณ์
-# ใช้ภาพพระพุทธรูปสีขาวลายเส้นวิจิตรสวยงามและจัดตำแหน่งไว้ตรงกลาง
-st.image(
-    "https://images.unsplash.com/photo-1609137144813-7d72110c7324?q=80&w=300", 
-    width=180, 
-    use_container_width=False
+# 3. ประดิษฐานรูปพระพุทธปฏิมากรของอาจารย์ (ครอบเจาะจงเฉพาะองค์พระสีขาว) ไว้กึ่งกลางด้านบนสุด
+st.markdown(
+    '<div class="image-container"><img class="buddha-logo" src="https://i.imgur.com/g886S1h.png" width="180"></div>', 
+    unsafe_allow_html=True
 )
 
-# แสดงหัวข้อระบบขนาดใหญ่ขึ้นตามต้องการ
+# แสดงหัวข้อระบบขนาดใหญ่เด่นชัดใต้รูปภาพ
 st.markdown('<p class="main-title">AI.prapali</p>', unsafe_allow_html=True)
 st.markdown('<p class="main-subtitle">นวัตกรรมปัญญาประดิษฐ์เพื่อการวิเคราะห์แปลไวยากรณ์บาลีและสืบค้นพระธรรมคัมภีร์</p>', unsafe_allow_html=True)
 
@@ -88,17 +97,15 @@ API_KEY = st.secrets.get("GEMINI_API_KEY")
 if not API_KEY:
     st.error("⚠️ ไม่พบรหัส API Key กรุณาตั้งค่า GEMINI_API_KEY ในระบบ Secrets ของ Streamlit")
 else:
-    # เริ่มต้นเชื่อมต่อโมเดลล่าสุด (Gemini 1.5 Flash)
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel('gemini-2.5-flash')
 
-    # ช่องพิมพ์รับข้อมูลแบบเด่นชัดตรงกลางหน้าเว็บ (Clean & Simple Input)
+    # ช่องพิมพ์รับข้อมูลสไตล์ Gemini
     user_input = st.text_input(
         "💬 สอบถามระบบถาม-ตอบพระบาลีและพระไตรปิฎกอรรถกถาได้ที่นี่:", 
         placeholder="พิมพ์ภาษาบาลีเพื่อแปลแยกธาตุปัจจัย หรือพิมพ์ภาษาไทยเพื่อค้นคว้าหลักธรรม..."
     )
 
-    # เมื่อมีการกดค้นหาหรือพิมพ์ข้อความ
     if user_input:
         with st.spinner("กำลังสืบค้นและประมวลผลจากคัมภีร์..."):
             buddha_prompt = f"""
@@ -119,7 +126,7 @@ else:
             except Exception as e:
                 st.error(f"เกิดข้อผิดพลาดในการประมวลผล: {str(e)}")
 
-# 4. แทรกกล่องข้อความผู้จัดทำและวัตถุประสงค์พุทธบูชาไว้ใต้ช่องตารางค้นหาทันทีตามที่ระบุ
+# 4. แทรกกล่องข้อความผู้จัดทำและวัตถุประสงค์พุทธบูชาไว้ใต้ช่องค้นหาทันที
 st.markdown("""
     <div class="creator-box">
         <div class="creator-title">🙏 ข้อความปรารภจากผู้จัดทำนวัตกรรม</div>
@@ -132,7 +139,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# ส่วนท้ายหน้าเว็บ (Footer)
+# ส่วนท้ายหน้าเว็บ
 st.markdown("""
     <div class="footer-container">
         <p>© 2026 AI.prapali - All Rights Reserved | ถวายเป็นพุทธบูชา</p>
