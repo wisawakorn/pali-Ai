@@ -1,84 +1,102 @@
 import streamlit as st
 import google.generativeai as genai
 
-# ตั้งค่าหน้าเว็บ
-st.set_page_config(page_title="บาลี AI", page_icon="🙏", layout="wide")
+# 1. ตั้งค่าหน้าเว็บให้สะอาดและกว้างขวางแบบมินิมอล
+st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี", page_icon="🙏", layout="centered")
 
+# 2. ปรับแต่งสไตล์ (CSS) ให้ดูสงบนิ่ง น่าเลื่อมใส และอ่านง่ายเหมือนระบบ Gemini
 st.markdown("""
     <style>
-    .title { color: #8B5A2B; font-size: 40px; font-weight: bold; text-align: center; }
-    .subtitle { font-size: 18px; text-align: center; color: #555555; margin-bottom: 20px; }
-    .royal-box { 
-        background-color: #FFF8DC; 
-        border-left: 5px solid #FFD700; 
+    /* ปรับแต่งฟอนต์และสีพื้นหลัง */
+    .reportview-container { background: #faf8f5; }
+    
+    /* หัวข้อหลัก */
+    .main-title { color: #8B5A2B; font-size: 36px; font-weight: bold; text-align: center; margin-bottom: 5px; }
+    .main-subtitle { font-size: 16px; text-align: center; color: #666666; margin-bottom: 25px; }
+    
+    /* กล่องพระราชปณิธานด้านการศึกษาปริยัติธรรม */
+    .royal-card { 
+        background-color: #FFFBF0; 
+        border: 1px solid #E6D5B8;
+        border-left: 5px solid #D4AF37; 
         padding: 15px; 
-        border-radius: 5px; 
+        border-radius: 8px; 
         margin-bottom: 25px;
     }
-    .royal-title { color: #8B6508; font-weight: bold; font-size: 16px; margin-bottom: 5px; }
-    .royal-text { color: #4A3C31; font-size: 15px; line-height: 1.6; }
-    .footer { 
+    .royal-header { color: #8B6508; font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+    .royal-body { color: #555555; font-size: 14px; line-height: 1.5; }
+    
+    /* ส่วนท้ายเว็บ (Footer) */
+    .footer-container { 
         text-align: center; 
         color: #8B5A2B; 
-        font-size: 14px; 
-        margin-top: 50px; 
-        padding: 20px;
-        border-top: 1px solid #eeeeee;
+        font-size: 13px; 
+        margin-top: 60px; 
+        padding-top: 15px;
+        border-top: 1px solid #EAEAEA;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<p class="title">AI.prapaliระบบวิเคราะห์และแปลบาลีไวยากรณ์</p>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">เพื่อการศึกษาพระปริยัติธรรม ถวายเป็นพุทธบูชาเนื่องในวันวิสาขบูชา</p>', unsafe_allow_html=True)
+# แสดงหัวข้อระบบ
+st.markdown('<p class="main-title">🙏 AI.prapali</p>', unsafe_allow_html=True)
+st.markdown('<p class="main-subtitle">นวัตกรรมปัญญาประดิษฐ์เพื่อการวิเคราะห์แปลไวยากรณ์บาลีและสืบค้นพระธรรมคัมภีร์</p>', unsafe_allow_html=True)
 
-# พระราชปณิธาน
+# แสดงกล่องพระราชปณิธานสนองพระบรมราโชวาท
 st.markdown("""
-    <div class="royal-box">
-        <div class="royal-title">📜 พระราชปณิธานและแนวพระบรมราโชวาทด้านการศึกษาพระปริยัติธรรม</div>
-        <div class="royal-text">
-            "การศึกษาพระปริยัติธรรมและภาษาบาลี เป็นเครื่องมือสำคัญในการรักษาพุทธพจน์ 
-            ทรงมีพระราชปณิธานในการสืบสาน รักษา และต่อยอด เพื่อให้พระภิกษุสามเณรมีความรู้ความเข้าใจ 
-            ในหลักธรรมคำสอนของพระพุทธเจ้าอย่างถูกต้อง แตกฉาน และนำความรู้นั้นมาอธิบายเผยแผ่ 
-            ให้แก่ประชาชนได้อย่างถูกต้องตรงตามคัมภีร์พระไตรปิฎก"
+    <div class="royal-card">
+        <div class="royal-header">📜 พระราชปณิธานด้านการศึกษาพระปริยัติธรรม</div>
+        <div class="royal-body">
+            "ทรงมีพระราชปณิธานในการสืบสาน รักษา และต่อยอดการศึกษาพระปริยัติธรรมและภาษาบาลี 
+            อันเป็นเครื่องมือสำคัญในการรักษาพุทธพจน์ เพื่อให้พระภิกษุสามเณรมีความรู้และความเข้าใจ 
+            นำไปอธิบายเผยแผ่แก่ประชาชนได้อย่างถูกต้องตรงตามคัมภีร์พระไตรปิฎก"
         </div>
     </div>
 """, unsafe_allow_html=True)
 
-st.write("---")
-
-# ดึงรหัส API Key
+# ดึงรหัส API Key จากระบบ Secrets ของ Streamlit
 API_KEY = st.secrets.get("GEMINI_API_KEY")
 
 if not API_KEY:
-    st.error("กรุณาตั้งค่า GEMINI_API_KEY ในระบบ Secrets ของ Streamlit")
+    st.error("⚠️ ไม่พบรหัส API Key กรุณาตั้งค่า GEMINI_API_KEY ในระบบ Secrets ของ Streamlit")
 else:
+    # เริ่มต้นเชื่อมต่อโมเดลล่าสุด (Gemini 1.5 Flash)
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel('gemini-2.5-flash')
 
-    st.write("### 📝 กรอกประโยคหรือคำศัพท์ที่ต้องการสืบค้น")
-    user_input = st.text_input("พิมพ์บาลีเพื่อแปล หรือพิมพ์ไทยเพื่อค้นธรรมะ", placeholder="ตัวอย่าง: ปุริโส คามํ คจฺฉติ หรือ อริยสัจ 4 คืออะไร")
+    # ช่องพิมพ์รับข้อมูลแบบเด่นชัดตรงกลางหน้าเว็บ (Clean & Simple Input)
+    user_input = st.text_input(
+        "💬 สอบถามระบบถาม-ตอบพระบาลีและพระไตรปิฎกอรรถกถาได้ที่นี่:", 
+        placeholder="พิมพ์ภาษาบาลีเพื่อแปลแยกธาตุปัจจัย หรือพิมพ์ภาษาไทยเพื่อค้นคว้าหลักธรรม..."
+    )
 
+    # เมื่อมีการกดค้นหาหรือพิมพ์ข้อความ
     if user_input:
-        with st.spinner("กำลังประมวลผล..."):
+        with st.spinner("กำลังสืบค้นและประมวลผลจากคัมภีร์..."):
             buddha_prompt = f"""
-            คุณคือผู้เชี่ยวชาญด้านภาษาบาลีและพระพุทธศาสนา 
-            1. หากเป็นภาษาบาลี: ให้แปลยกศัพท์และวิเคราะห์ไวยากรณ์บาลีสนามหลวงอย่างละเอียด
-            2. หากเป็นคำถามธรรมะ: ให้สืบค้นและอธิบายตามหลักพระไตรปิฎกอรรถกถาอย่างถูกต้องและสุภาพ
-            ⚠️ ห้ามตอบเรื่องที่ไม่เกี่ยวข้องกับพระพุทธศาสนาเด็ดขาด
+            คุณคือ AI.prapali ผู้เชี่ยวชาญระดับสูงด้านภาษาบาลี คัมภีร์พระไตรปิฎก และพระพุทธศาสนา
+            จงทำหน้าที่วิเคราะห์ข้อความต่อไปนี้:
+            1. หากเป็นภาษาบาลี: ให้ทำการแปลยกศัพท์ วิเคราะห์วิภัตติปัจจัย แยกธาตุ ปัจจัย ตัดสนธิ-สมาส ตามหลักบาลีสนามหลวงอย่างแม่นยำ
+            2. หากเป็นภาษาไทย/คำถามธรรมะ: ให้สืบค้นอธิบายหลักธรรมตามคัมภีร์พระไตรปิฎกและอรรถกถาอย่างถูกต้องและสุภาพ
+            
+            ⚠️ ข้อบังคับเด็ดขาด (Security Guard): ห้ามตอบเรื่องทางโลกที่ไม่เกี่ยวข้องกับพระพุทธศาสนา พระธรรม พระสงฆ์ หรือภาษาบาลีเด็ดขาด หากพบให้ปฏิเสธอย่างสุภาพทันที
+            
             ข้อความจากผู้ใช้: {user_input}
             """
+            
             try:
                 response = model.generate_content(buddha_prompt)
-                st.info("ผลการประมวลผล:")
+                # แสดงผลลัพธ์ในกรอบที่อ่านง่าย สะอาดตา
+                st.markdown("### 📝 ผลการประมวลผลระบบ:")
                 st.write(response.text)
             except Exception as e:
-                st.error(f"เกิดข้อผิดพลาด: {str(e)}")
+                st.error(f"เกิดข้อผิดพลาดในการประมวลผล: {str(e)}")
 
-# ส่วนท้ายแสดงผู้จัดทำ (Footer)
+# ส่วนท้ายหน้าเว็บ (Footer) แสดงเจตนารมณ์ผู้จัดทำ
 st.markdown("""
-    <div class="footer">
-        <p><b>ผู้จัดทำ:</b> วิศวกรณ์ พระบัวบาน</p>
-        <p>สร้าง <b>Pali AI</b> เป็นพุทธบูชาแด่พระสัมมาพุทธเจ้า</p>
-        <p style="font-style: italic; color: #999;">"ธรรมะที่รักษาไว้อย่างถูกต้อง คือรากแก้วของพระศาสนา"</p>
+    <div class="footer-container">
+        <p><b>ผู้จัดทำนวัตกรรม:</b> วิศวกรณ์ พระบัวบาน</p>
+        <p>จัดสร้างระบบ <b>AI.prapali</b> เพื่อถวายเป็นพุทธบูชาเนื่องในวันวิสาขบูชา และสนองพระบรมราโชวาท</p>
+        <p style="color: #BBBBBB; font-size: 11px; margin-top: 10px;">"ธรรมะที่รักษาไว้อย่างถูกต้อง คือรากแก้วที่มั่นคงของพระพุทธศาสนา"</p>
     </div>
 """, unsafe_allow_html=True)
