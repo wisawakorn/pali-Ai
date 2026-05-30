@@ -4,14 +4,22 @@ import google.generativeai as genai
 # 1. ตั้งค่าหน้าเว็บให้สะอาดและกว้างขวางแบบมินิมอล
 st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี", page_icon="🙏", layout="centered")
 
-# 2. ปรับแต่งสไตล์ (CSS) ให้ดูสงบนิ่ง น่าเลื่อมใส และอ่านง่ายเหมือนระบบ Gemini
+# 2. ปรับแต่งสไตล์ (CSS) ขยายหัวข้อและปรับแต่งองค์ประกอบให้สมภาคภูมิ
 st.markdown("""
     <style>
-    /* ปรับแต่งฟอนต์และสีพื้นหลัง */
-    .reportview-container { background: #faf8f5; }
+    /* ตั้งค่าฟอนต์และพื้นหลัง */
+    body { background-color: #faf8f5; }
     
-    /* หัวข้อหลัก */
-    .main-title { color: #8B5A2B; font-size: 36px; font-weight: bold; text-align: center; margin-bottom: 5px; }
+    /* ขยายขนาดหัวข้อหลักตามความประสงค์ */
+    .main-title { 
+        color: #8B5A2B; 
+        font-size: 52px; /* ขยายขนาดตัวอักษรให้ใหญ่เด่นชัด */
+        font-weight: bold; 
+        text-align: center; 
+        margin-top: 10px;
+        margin-bottom: 5px; 
+        letter-spacing: 1px;
+    }
     .main-subtitle { font-size: 16px; text-align: center; color: #666666; margin-bottom: 25px; }
     
     /* กล่องพระราชปณิธานด้านการศึกษาปริยัติธรรม */
@@ -26,20 +34,40 @@ st.markdown("""
     .royal-header { color: #8B6508; font-weight: bold; font-size: 14px; margin-bottom: 4px; }
     .royal-body { color: #555555; font-size: 14px; line-height: 1.5; }
     
-    /* ส่วนท้ายเว็บ (Footer) */
+    /* กล่องข้อความผู้จัดทำและวัตถุประสงค์ใต้ช่องค้นหา */
+    .creator-box {
+        background-color: #fcfcfc;
+        border: 1px dashed #D4AF37;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 25px;
+        text-align: center;
+    }
+    .creator-title { color: #8B5A2B; font-weight: bold; font-size: 15px; margin-bottom: 8px; }
+    .creator-text { color: #444444; font-size: 14px; line-height: 1.6; text-align: justify; text-justify: inter-word; }
+    
+    /* ส่วนท้ายเว็บ */
     .footer-container { 
         text-align: center; 
         color: #8B5A2B; 
-        font-size: 13px; 
-        margin-top: 60px; 
+        font-size: 12px; 
+        margin-top: 40px; 
         padding-top: 15px;
         border-top: 1px solid #EAEAEA;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# แสดงหัวข้อระบบ
-st.markdown('<p class="main-title">🙏 AI.prapali</p>', unsafe_allow_html=True)
+# 3. ประดิษฐานรูปพระพุทธปฏิมากรโทนสีขาวสไตล์ศิลปะร่วมสมัยด้านบนสุดเพื่อเป็นสัญลักษณ์
+# ใช้ภาพพระพุทธรูปสีขาวลายเส้นวิจิตรสวยงามและจัดตำแหน่งไว้ตรงกลาง
+st.image(
+    "https://images.unsplash.com/photo-1609137144813-7d72110c7324?q=80&w=300", 
+    width=180, 
+    use_container_width=False
+)
+
+# แสดงหัวข้อระบบขนาดใหญ่ขึ้นตามต้องการ
+st.markdown('<p class="main-title">AI.prapali</p>', unsafe_allow_html=True)
 st.markdown('<p class="main-subtitle">นวัตกรรมปัญญาประดิษฐ์เพื่อการวิเคราะห์แปลไวยากรณ์บาลีและสืบค้นพระธรรมคัมภีร์</p>', unsafe_allow_html=True)
 
 # แสดงกล่องพระราชปณิธานสนองพระบรมราโชวาท
@@ -86,17 +114,27 @@ else:
             
             try:
                 response = model.generate_content(buddha_prompt)
-                # แสดงผลลัพธ์ในกรอบที่อ่านง่าย สะอาดตา
                 st.markdown("### 📝 ผลการประมวลผลระบบ:")
                 st.write(response.text)
             except Exception as e:
                 st.error(f"เกิดข้อผิดพลาดในการประมวลผล: {str(e)}")
 
-# ส่วนท้ายหน้าเว็บ (Footer) แสดงเจตนารมณ์ผู้จัดทำ
+# 4. แทรกกล่องข้อความผู้จัดทำและวัตถุประสงค์พุทธบูชาไว้ใต้ช่องตารางค้นหาทันทีตามที่ระบุ
+st.markdown("""
+    <div class="creator-box">
+        <div class="creator-title">🙏 ข้อความปรารภจากผู้จัดทำนวัตกรรม</div>
+        <div class="creator-text">
+            <b>ผู้จัดทำ: ร้อยเอก วิศวกรณ์ พระบัวบาน</b><br>
+            จัดทำขึ้นเพื่อถวายเป็นพุทธบูชาแด่องค์พระสัมมาสัมพุทธเจ้า เพื่อระลึกถึงคุณพระรัตนตรัยเนื่องในวันวิสาขบูชาโลก 
+            โดยมีวัตถุประสงค์เพื่อให้พระภิกษุสามเณร และผู้ที่กำลังศึกษาเล่าเรียนพระปริยัติธรรมแผนกบาลี 
+            ได้ใช้เป็นเครื่องมือในการศึกษา ค้นคว้า และหาความรู้ในพระศาสนาได้อย่างถูกต้องและสะดวกรวดเร็วยิ่งขึ้น
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
+# ส่วนท้ายหน้าเว็บ (Footer)
 st.markdown("""
     <div class="footer-container">
-        <p><b>ผู้จัดทำนวัตกรรม:</b> วิศวกรณ์ พระบัวบาน</p>
-        <p>จัดสร้างระบบ <b>AI.prapali</b> เพื่อถวายเป็นพุทธบูชาเนื่องในวันวิสาขบูชา และสนองพระบรมราโชวาท</p>
-        <p style="color: #BBBBBB; font-size: 11px; margin-top: 10px;">"ธรรมะที่รักษาไว้อย่างถูกต้อง คือรากแก้วที่มั่นคงของพระพุทธศาสนา"</p>
+        <p>© 2026 AI.prapali - All Rights Reserved | ถวายเป็นพุทธบูชา</p>
     </div>
 """, unsafe_allow_html=True)
