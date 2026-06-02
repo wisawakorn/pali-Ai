@@ -21,14 +21,15 @@ st.markdown("""
         background-color: #f7f4eb !important;
     }
     
-    /* หัวข้อหลัก AI.prapali */
-    .main-title { 
-        color: #704d2b; 
-        font-size: 52px; 
-        font-weight: bold; 
-        text-align: center; 
-        margin-top: 15px;
-        margin-bottom: 5px; 
+    /* คัดลอกส่วนนี้ไปวางทับในกล่อง <style> ตัวเดิมได้เลยครับ */
+.main-title { 
+    color: #704d2b !important; 
+    font-size: 72px !important; /* ปรับเพิ่มขนาดจากเดิมให้ใหญ่เต็มตา */
+    font-weight: 900 !important; /* เพิ่มความหนาขั้นสุด */
+    text-align: center !important; 
+    margin-top: 25px !important;
+    margin-bottom: 5px !important; 
+    letter-spacing: 1px !important; /* เว้นระยะตัวอักษรให้ดูหรูหรา */
     }
     .main-subtitle { 
         font-size: 17px; 
