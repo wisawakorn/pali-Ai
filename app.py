@@ -7,6 +7,15 @@ st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี",
 # 2. ปรับแต่งโครงสร้าง CSS ธีมสีครีม-ทอง สไตล์มินิมอล สะอาดตา
 st.markdown("""
     <style>
+    /* ซ่อนแถบเมนูและปุ่มเครื่องมือมุมขวาบนทั้งหมด */
+    header {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    footer {
+        visibility: hidden !important;
+    }
+    
     /* พื้นหลังสีครีมมงคล */
     .stApp {
         background-color: #f7f4eb !important;
@@ -41,7 +50,7 @@ st.markdown("""
     .royal-header { color: #704d2b; font-weight: bold; font-size: 17px; margin-bottom: 8px; }
     .royal-body { color: #3a3a3a; font-size: 15px; line-height: 1.7; text-align: justify; }
     
-    /* ส่วนท้ายหน้าเว็บ (Footer รวมข้อความลิขสิทธิ์และข้อความปรารภตามสั่ง) */
+    /* ส่วนท้ายหน้าเว็บ */
     .footer-container { 
         text-align: center; 
         color: #704d2b; 
