@@ -96,8 +96,8 @@ with st.sidebar:
         st.markdown("""
             <p style="font-size: 13px; color: #555;">
                 <b>ชื่อ:</b> AI.prapali (เอไอ ประบาลี)<br>
-                <b>ผู้สร้างสรรค์:</b> ร้อยเอก วิศวกรณ์ พระบัวบาน<br>
-                <b>วัตถุประสงค์:</b> ถวายเป็นพุทธบูชาและสนับสนุนการศึกษาคณะสงฆ์
+                <b>ผู้สร้างสรรค์:</b> นาย วิศวกรณ์ พระบัวบาน<br>
+                <b>วัตถุประสงค์:</b> ถวายเป็นพุทธบูชาและสนับสนุนการศึกษาพระธรรมบาลี
             </p>
         """, unsafe_allow_html=True)
 
@@ -218,3 +218,16 @@ if len(st.session_state.messages) < 3:
             </div>
         </div>
     """, unsafe_allow_html=True)
+# 2. ประมวลผลและแสดงข้อความฝั่ง AI
+        with st.chat_message("assistant"):
+            with st.spinner("กำลังสืบค้นและประมวลผล..."):
+                try:
+                    response = model.generate_content(user_input)
+                    full_response = response.text
+                    
+                    st.markdown(full_response)
+                    st.session_state.messages.append({"role": "assistant", "content": full_response})
+                    st.rerun()
+                except Exception as e:
+                    # แก้ไขตรงนี้ให้แสดงสาเหตุที่แท้จริงออกมาบนหน้าจอเลยครับ
+                    st.error(f"⚠️ ระบบเชื่อมต่อขัดข้องเนื่องจาก: {e}")
