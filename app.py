@@ -188,7 +188,7 @@ if API_KEY:
     )
     
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=system_prompt)
+    model = genai.GenerativeModel('gemini-3.5-flash', system_instruction=system_prompt)
     
     # ช่องพิมพ์คำถามด้านล่างสุด (Floating Chat Input แบบหน้า Gemini / Jenova)
     if user_input := st.chat_input("พิมพ์คำศัพท์บาลีเพื่อแปล หรือพิมพ์ข้อธรรมที่ต้องการสืบค้น..."):
