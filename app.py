@@ -118,11 +118,12 @@ with st.sidebar:
             </p>
         """, unsafe_allow_html=True)
 
+    # แก้ไขจุดนี้: เปลี่ยนมาใช้ Single Quotes ครอบ String นอกสุดเพื่อป้องกัน SyntaxError
     with st.expander("💳 การสมัครสมาชิก", expanded=False):
-        st.markdown("<p class="sidebar-subtext">เปิดใช้งานฟรีทุกฟังก์ชันเพื่อสนับสนุนกิจการคณะสงฆ์</p>", unsafe_allow_html=True)
+        st.markdown('<p class="sidebar-subtext">เปิดใช้งานฟรีทุกฟังก์ชันเพื่อสนับสนุนกิจการคณะสงฆ์</p>', unsafe_allow_html=True)
 
     with st.expander("🤝 เชิญเพื่อน", expanded=False):
-        st.markdown("<p class="sidebar-subtext">แชร์ลิงก์แอปพลิเคชันนี้เพื่อร่วมเผยแผ่เป็นธรรมทาน</p>", unsafe_allow_html=True)
+        st.markdown('<p class="sidebar-subtext">แชร์ลิงก์แอปพลิเคชันนี้เพื่อร่วมเผยแผ่เป็นธรรมทาน</p>', unsafe_allow_html=True)
 
     with st.expander("📲 ดาวน์โหลดแอปพลิเคชัน", expanded=True):
         st.markdown("""
@@ -141,7 +142,7 @@ with st.sidebar:
         """, unsafe_allow_html=True)
 
     with st.expander("📜 ข้อกำหนดและนโยบาย", expanded=False):
-        st.markdown("<p class="sidebar-subtext">งานซอฟต์แวร์และชุดคำสั่งนี้สงวนสิทธิ์ภายใต้กฎหมายลิขสิทธิ์ประเภทโปรแกรมคอมพิวเตอร์ ห้ามคัดลอกดัดแปลง</p>", unsafe_allow_html=True)
+        st.markdown('<p class="sidebar-subtext">งานซอฟต์แวร์และชุดคำสั่งนี้สงวนสิทธิ์ภายใต้กฎหมายลิขสิทธิ์ประเภทโปรแกรมคอมพิวเตอร์ ห้ามคัดลอกดัดแปลง</p>', unsafe_allow_html=True)
 
     st.markdown("<br><div style='text-align: center; color: #555; font-size: 11px;'>© 2026 AI.prapali | All Rights Reserved.</div>", unsafe_allow_html=True)
 
@@ -197,7 +198,7 @@ if API_KEY:
         with st.chat_message("user"):
             st.markdown(user_input)
             
-        # ประมวลผลและแสดงข้อความฝั่ง AI (แก้ไขบั๊ก Indentation เรียบร้อย)
+        # ประมวลผลและแสดงข้อความฝั่ง AI
         with st.chat_message("assistant"):
             with st.spinner("กำลังสืบค้นและประมวลผล..."):
                 try:
