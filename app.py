@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # 1. ตั้งค่าโครงสร้างหน้าเว็บ จัดกึ่งกลางให้สวยงาม
-st.set_page_config(page_title="AI.prapali - เอไอ ประบาลี", page_icon="🙏", layout="centered")
+st.set_page_config(page_title="AI.prapali - เอไอ พระบาลี", page_icon="🙏", layout="centered")
 
 # 2. ปรับแต่งโครงสร้าง CSS ธีมสีครีม-ทอง สไตล์มินิมอล สะอาดตา
 st.markdown("""
