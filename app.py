@@ -128,3 +128,77 @@ st.markdown("""
         </div>
     </div>
 """, unsafe_allow_html=True)
+# วางโค้ดชุดนี้ไว้ในไฟล์ app.py เพื่อสร้างเมนูด้านข้างแบบมืออาชีพ
+import streamlit as st
+
+with st.sidebar:
+    # 1. โลโก้และชื่อระบบด้านบนเมนู
+    st.markdown("""
+        <div style="text-align: center; margin-bottom: 20px;">
+            <span style="font-size: 50px;">🙏</span> <!-- หรือเปลี่ยนเป็น URL รูปภาพโลโก้ธรรมจักรของผู้กองได้ครับ -->
+            <h3 style="color: #704d2b; margin-top: 10px; font-weight: bold;">AI.prapali</h3>
+            <p style="font-size: 13px; color: #666;">ระบบปัญญาประดิษฐ์เพื่อพระพุทธศาสนา</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # 2. รายการเมนูสไตล์มินิมอล ถอดแบบจากต้นฉบับ
+    st.markdown("### 📋 เมนูใช้งาน")
+    
+    # เมนู: โปรไฟล์ระบบ
+    with st.expander("👤 โปรไฟล์ระบบ AI", expanded=False):
+        st.markdown("""
+            <p style="font-size: 13px; color: #555;">
+                <b>ชื่อ:</b> AI.prapali (เอไอ ประบาลี)<br>
+                <b>ผู้สร้างสรรค์:</b> ร้อยเอก วิศวกรณ์ พระบัวบาน<br>
+                <b>วัตถุประสงค์:</b> ถวายเป็นพุทธบูชาและสนับสนุนการศึกษาคณะสงฆ์
+            </p>
+        """, unsafe_allow_html=True)
+
+    # เมนู: ขอบเขตการใช้งาน
+    with st.expander("⚡ ขอบเขตการใช้งาน", expanded=False):
+        st.markdown("""
+            <p style="font-size: 13px; color: #555;">
+                • แปลภาษาพื้นถิ่นทั่วโลกเป็นภาษาบาลี<br>
+                • แปลภาษาบาลีกลับเป็นภาษาท้องถิ่นต่าง ๆ<br>
+                • สืบค้นพระไตรปิฎก อรรถกถา และวิเคราะห์ไวยากรณ์
+            </p>
+        """, unsafe_allow_html=True)
+
+    # เมนู: ดาวน์โหลดแอป (ไฮไลต์เด็ดแบบของเขา)
+    with st.expander("📲 ดาวน์โหลดแอปพลิเคชัน", expanded=True):
+        st.markdown("""
+            <div style="padding: 5px;">
+                <!-- ปุ่ม iOS -->
+                <a href="#" style="text-decoration: none;">
+                    <div style="background-color: #111111; color: white; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 8px; font-size: 13px; font-weight: 500;">
+                        🍏 สำหรับ iOS (iPhone)
+                    </div>
+                </a>
+                <!-- ปุ่ม Android -->
+                <a href="#" style="text-decoration: none;">
+                    <div style="background-color: #3DDC84; color: black; padding: 10px; border-radius: 6px; text-align: center; font-size: 13px; font-weight: bold;">
+                        🤖 สำหรับ Android (.APK)
+                    </div>
+                </a>
+                <p style="font-size: 11px; color: #888; text-align: center; margin-top: 5px;">*สแกนหรือกดเลือกเพื่อติดตั้งลงมือถือ</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # เมนู: การคุ้มครองสิทธิ์และนโยบาย
+    with st.expander("📜 ลิขสิทธิ์และนโยบาย", expanded=False):
+        st.markdown("""
+            <p style="font-size: 12px; color: #555; text-align: justify;">
+                งานซอฟต์แวร์และชุดคำสั่งนี้ ได้รับการคุ้มครองสิทธิ์ภายใต้ <b>"กฎหมายลิขสิทธิ์" ประเภทงานวรรณกรรม (โปรแกรมคอมพิวเตอร์)</b> ห้ามมิให้ผู้ใดคัดลอกหรือดัดแปลงโดยไม่ได้รับอนุญาต
+            </p>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    
+    # 3. ส่วนท้ายแถบเมนู
+    st.markdown("""
+        <div style="text-align: center; color: #888; font-size: 11px;">
+            © 2026 AI.prapali<br>All Rights Reserved.
+        </div>
+    """, unsafe_allow_html=True)
