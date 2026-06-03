@@ -86,7 +86,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─── ส่วนที่อัปเดตใหม่: ระบบติดตั้ง Web App ───
-    with st.expander("📲 ติดตั้งแอปพลิเคชัน (Web App)", expanded=True):
+        with st.expander("📲 ติดตั้งแอปพลิเคชัน (Web App)", expanded=True):
         st.markdown("""
             <p class="sidebar-subtext" style="margin-bottom: 15px;">
                 ท่านสามารถติดตั้ง <b>AI.prapali</b> ลงบนหน้าจอมือถือหรือคอมพิวเตอร์ เพื่อใช้งานได้ทันทีเหมือนแอปพลิเคชันทั่วไป
