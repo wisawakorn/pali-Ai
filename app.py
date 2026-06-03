@@ -7,9 +7,22 @@ st.set_page_config(page_title="AI.prapali - เอไอ พระบาลี",
 # 2. ปรับแต่ง CSS เปลี่ยนโลกให้เป็นสีดาร์กโมดหรูหรา ตัดด้วยทองและส้มอิฐแบบหน้า Jenova
 st.markdown("""
     <style>
-    /* ซ่อนแถบเมนูของ Streamlit */
-    header { visibility: hidden !important; display: none !important; }
+    /* ซ่อนแถบเมนูหลักของ Streamlit แต่เปิดทางให้ปุ่มควบคุม Sidebar */
+    header { visibility: hidden !important; height: 0px !important; }
     footer { visibility: hidden !important; }
+    
+    /* 🛠️ แก้ไขจุดที่ 1: ปลดล็อกและตกแต่งปุ่มเปิด-ปิดแถบข้าง (Sidebar Toggle) ให้ลอยเด่นเป็นสีทอง */
+    [data-testid="stSidebarCollapsedControl"] {
+        visibility: visible !important;
+        display: flex !important;
+        background-color: #1a1a1a !important;
+        border: 1px solid #2d2d2d !important;
+        border-radius: 0 10px 10px 0 !important;
+        top: 10px !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] button {
+        color: #c5a85c !important;
+    }
     
     /* พื้นหลังมืดสนิทแบบ Jenova */
     .stApp {
@@ -17,10 +30,26 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* เมนูด้านข้างดาร์กโทน */
+    /* เมนูด้านข้างดาร์กโทน และเปิดให้มี Scrollbar เสมอหากเนื้อหายาว */
     [data-testid="stSidebar"] {
         background-color: #1a1a1a !important;
         border-right: 1px solid #2d2d2d;
+        overflow-y: auto !important;
+    }
+    
+    /* 🛠️ แก้ไขจุดที่ 2: ตกแต่งแถบเลื่อนด้านข้าง (Scrollbar) ให้เป็นสีทองสไตล์ Jenova ไม่ให้กลืนกับพื้นหลังดำ */
+    [data-testid="stSidebar"]::-webkit-scrollbar {
+        width: 8px !important;
+    }
+    [data-testid="stSidebar"]::-webkit-scrollbar-track {
+        background: #1a1a1a !important;
+    }
+    [data-testid="stSidebar"]::-webkit-scrollbar-thumb {
+        background: #c5a85c !important;
+        border-radius: 4px !important;
+    }
+    [data-testid="stSidebar"]::-webkit-scrollbar-thumb:hover {
+        background: #a38743 !important;
     }
     
     /* หัวข้อหลักตรงกลางหน้าจอ */
@@ -122,7 +151,6 @@ with st.sidebar:
     with st.expander("🤝 เชิญเพื่อน", expanded=False):
         st.markdown('<p class="sidebar-subtext">แชร์ลิงก์แอปพลิเคชันนี้เพื่อร่วมเผยแผ่เป็นธรรมทาน</p>', unsafe_allow_html=True)
 
-    # 📲 ส่วนที่อัปเดตใหม่: ระบบแนะนำการติดตั้ง Web App
     with st.expander("📲 ติดตั้งแอปพลิเคชัน (Web App)", expanded=True):
         st.markdown("""
             <p class="sidebar-subtext" style="margin-bottom: 12px;">
