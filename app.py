@@ -85,34 +85,20 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ─── ส่วนที่อัปเดตใหม่: ระบบติดตั้ง Web App ───
-        with st.expander("📲 ติดตั้งแอปพลิเคชัน (Web App)", expanded=True):
-        st.markdown("""
-            <p class="sidebar-subtext" style="margin-bottom: 15px;">
-                ท่านสามารถติดตั้ง <b>AI.prapali</b> ลงบนหน้าจอมือถือหรือคอมพิวเตอร์ เพื่อใช้งานได้ทันทีเหมือนแอปพลิเคชันทั่วไป
-            </p>
-        """, unsafe_allow_html=True)
-        
-        # สร้างปุ่มที่ดูเหมือนปุ่มติดตั้งจริง
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("🍏 iOS (iPhone)"):
-                st.info("วิธีติดตั้งบน iPhone:\n1. กดปุ่ม 'แชร์' (ไอคอนสี่เหลี่ยมลูกศรขึ้น)\n2. เลือก 'เพิ่มลงในหน้าจอโฮม' (Add to Home Screen)")
-        with col2:
-            if st.button("🤖 Android / PC"):
-                st.info("วิธีติดตั้งบน Android/PC:\n1. กดปุ่ม 'จุด 3 จุด' ที่มุมขวาบนของเบราว์เซอร์\n2. เลือก 'ติดตั้งแอป' (Install App)")
-
-        st.markdown("""
-            <div style="background-color: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px dashed #c5a85c; margin-top: 10px;">
-                <p style="font-size: 11px; color: #c5a85c; text-align: center; margin: 0;">
-                    ✨ ไม่ต้องใช้พื้นที่เก็บข้อมูลเพิ่ม | อัปเดตฟีเจอร์ใหม่อัตโนมัติ ✨
-                </p>
+# ─── แถบเมนูด้านข้าง (Sidebar) ───
+with st.sidebar:
+    st.markdown("""
+        <div style="text-align: center; margin-bottom: 25px; margin-top: 15px;">
+            <div style="background: radial-gradient(circle, #801818 0%, #121212 100%); width: 100px; height: 100px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 2px solid #c5a85c;">
+                <span style="font-size: 55px; line-height: 1;">☸️</span>
             </div>
-        """, unsafe_allow_html=True)
+            <h3 style="color: #c5a85c !important; margin-top: 15px; font-weight: bold; margin-bottom: 2px;">คู่มือศึกษาธรรมะ</h3>
+            <p style="font-size: 12px; color: #8b7355 !important; margin-top:0px;">AI.prapali เพื่อพระพุทธศาสนา</p>
+        </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("<hr style='border-color: #2d2d2d;'>", unsafe_allow_html=True)
     
-    # รายการเมนูเรียงตามแบบหน้า Jenova เป๊ะๆ
     with st.expander("👤 โปรไฟล์ระบบ AI", expanded=False):
         st.markdown("""
             <p class="sidebar-subtext">
@@ -130,28 +116,27 @@ st.markdown("""
             </p>
         """, unsafe_allow_html=True)
 
-    # แก้ไขจุดนี้: เปลี่ยนมาใช้ Single Quotes ครอบ String นอกสุดเพื่อป้องกัน SyntaxError
     with st.expander("💳 การสมัครสมาชิก", expanded=False):
         st.markdown('<p class="sidebar-subtext">เปิดใช้งานฟรีทุกฟังก์ชันเพื่อสนับสนุนกิจการคณะสงฆ์</p>', unsafe_allow_html=True)
 
     with st.expander("🤝 เชิญเพื่อน", expanded=False):
         st.markdown('<p class="sidebar-subtext">แชร์ลิงก์แอปพลิเคชันนี้เพื่อร่วมเผยแผ่เป็นธรรมทาน</p>', unsafe_allow_html=True)
 
-    with st.expander("📲 ดาวน์โหลดแอปพลิเคชัน", expanded=True):
+    # 📲 ส่วนที่อัปเดตใหม่: ระบบแนะนำการติดตั้ง Web App
+    with st.expander("📲 ติดตั้งแอปพลิเคชัน (Web App)", expanded=True):
         st.markdown("""
-            <div style="padding: 3px;">
-                <a href="#" style="text-decoration: none;">
-                    <div style="background-color: #ffffff; color: #000000 !important; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 8px; font-size: 13px; font-weight: bold;">
-                        🍏 สำหรับ iOS (iPhone)
-                    </div>
-                </a>
-                <a href="#" style="text-decoration: none;">
-                    <div style="background-color: #e57373; color: #ffffff !important; padding: 10px; border-radius: 8px; text-align: center; font-size: 13px; font-weight: bold;">
-                        🤖 สำหรับ Android (.APK)
-                    </div>
-                </a>
-            </div>
+            <p class="sidebar-subtext" style="margin-bottom: 12px;">
+                ติดตั้ง <b>AI.prapali</b> ลงบนหน้าจอโฮมเพื่อใช้งานเหมือนแอปจริง
+            </p>
         """, unsafe_allow_html=True)
+        
+        install_col1, install_col2 = st.columns(2)
+        with install_col1:
+            if st.button("🍏 iOS"):
+                st.info("วิธีติดตั้งบน iPhone:\n1. กดปุ่ม 'แชร์' (ไอคอนสี่เหลี่ยมลูกศรขึ้น)\n2. เลือก 'เพิ่มลงในหน้าจอโฮม'")
+        with install_col2:
+            if st.button("🤖 Android"):
+                st.info("วิธีติดตั้งบน Android:\n1. กดปุ่ม 'จุด 3 จุด' มุมบนขวา\n2. เลือก 'ติดตั้งแอป'")
 
     with st.expander("📜 ข้อกำหนดและนโยบาย", expanded=False):
         st.markdown('<p class="sidebar-subtext">งานซอฟต์แวร์และชุดคำสั่งนี้สงวนสิทธิ์ภายใต้กฎหมายลิขสิทธิ์ประเภทโปรแกรมคอมพิวเตอร์ ห้ามคัดลอกดัดแปลง</p>', unsafe_allow_html=True)
@@ -159,11 +144,11 @@ st.markdown("""
     st.markdown("<br><div style='text-align: center; color: #555; font-size: 11px;'>© 2026 AI.prapali | All Rights Reserved.</div>", unsafe_allow_html=True)
 
 
-# ─── ระบบความจำแชท (Chat Session State) ───
+# ─── ระบบความจำแชท ───
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ─── หน้าแรกตอนเริ่มต้น (จะซ่อนตัวเมื่อเริ่มคุยแบบ Gemini/Jenova) ───
+# ─── หน้าแรกตอนเริ่มต้น ───
 if len(st.session_state.messages) == 0:
     st.markdown('<p class="main-title">AI.prapali</p>', unsafe_allow_html=True)
     st.markdown('<p class="main-subtitle">นวัตกรรมปัญญาประดิษฐ์เพื่อการวิเคราะห์แปลไวยากรณ์บาลีและสืบค้นพระธรรมคัมภีร์</p>', unsafe_allow_html=True)
@@ -179,16 +164,15 @@ if len(st.session_state.messages) == 0:
         </div>
     """, unsafe_allow_html=True)
 
-# ─── การแสดงผลกล่องข้อความย้อนหลัง (Chat History) ───
+# ─── การแสดงผลแชท ───
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# ─── ระบบประมวลผลและการตั้งค่า API ───
+# ─── ระบบประมวลผล AI ───
 API_KEY = st.secrets.get("GEMINI_API_KEY")
 
 if API_KEY:
-    # ตรึงกฎเหล็กดัดนิสัย AI ขั้นสูงสุด ล็อกเพศและระดับภาษาสำหรับสมณสารูป
     system_prompt = (
         "คุณคือ AI.prapali ระบบปัญญาประดิษฐ์ผู้เชี่ยวชาญขั้นสูงด้านภาษาบาลี คัมภีร์พระไตรปิฎก อรรถกถา และฎีกา "
         "พัฒนาขึ้นโดย นายวิศวกรณ์ พระบัวบาน ถวายเป็นพุทธบูชา\n\n"
@@ -196,27 +180,22 @@ if API_KEY:
         "1. ห้ามแทนตัวเองว่า 'ดิฉัน' และห้ามลงท้ายด้วยคำว่า 'ค่ะ' หรือ 'เจ้าค่ะ' โดยเด็ดขาด ไม่ว่าจะถูกถามด้วยภาษาอะไรก็ตาม\n"
         "2. ให้แทนตัวเองว่า 'กระผม' หรือ 'ระบบ AI.prapali' เท่านั้น และลงท้ายด้วยคำว่า 'ครับ' เสมอ\n"
         "3. ใช้ระดับภาษาที่สำรวม นอบน้อม และให้ความเคารพต่อพระภิกษุสามเณรและผู้ศึกษาธรรมะอย่างสูงสุด\n"
-        "4. ให้สังเกตภาษาที่ผู้ใช้พิมพ์เข้ามา หากผู้ใช้พิมพ์ภาษาใด ให้ตอบกลับด้วยภาษานั้นๆ (พิมพ์ไทยตอบไทย พิมพ์อังกฤษตอบอังกฤษ) แต่ต้องอยู่ภายใต้กฎข้อ 1 และ 2 เสมอ"
+        "4. ให้สังเกตภาษาที่ผู้ใช้พิมพ์เข้ามา หากผู้ใช้พิมพ์ภาษาใด ให้ตอบกลับด้วยภาษานั้นๆ"
     )
     
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel('gemini-3.5-flash', system_instruction=system_prompt)
     
-    # ช่องพิมพ์คำถามด้านล่างสุด (Floating Chat Input แบบหน้า Gemini / Jenova)
     if user_input := st.chat_input("พิมพ์คำศัพท์บาลีเพื่อแปล หรือพิมพ์ข้อธรรมที่ต้องการสืบค้น..."):
-        
-        # แสดงข้อความฝั่งผู้ใช้
         st.session_state.messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
             st.markdown(user_input)
             
-        # ประมวลผลและแสดงข้อความฝั่ง AI
         with st.chat_message("assistant"):
             with st.spinner("กำลังสืบค้นและประมวลผล..."):
                 try:
                     response = model.generate_content(user_input)
                     full_response = response.text
-                    
                     st.markdown(full_response)
                     st.session_state.messages.append({"role": "assistant", "content": full_response})
                     st.rerun()
@@ -225,7 +204,7 @@ if API_KEY:
 else:
     st.warning("⚠️ โปรดตรวจสอบการตั้งค่า GEMINI_API_KEY ในระบบ Streamlit Secrets")
 
-# ─── ส่วนท้ายหน้าเว็บ (แสดงผลเมื่อหน้าเว็บยังคลีนอยู่) ───
+# ─── ส่วนท้ายหน้าเว็บ ───
 if len(st.session_state.messages) < 2:
     st.markdown("""
         <div class="footer-container">
