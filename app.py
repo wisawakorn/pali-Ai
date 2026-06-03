@@ -85,18 +85,30 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ─── แถบเมนูด้านข้าง (Sidebar) ถอดแบบปุ่มจาก Jenova เป๊ะๆ ───
-with st.sidebar:
-    # โลโก้กงล้อธรรมจักรสีทอง/แดงเพลิง แบบ Jenova
-    st.markdown("""
-        <div style="text-align: center; margin-bottom: 25px; margin-top: 15px;">
-            <div style="background: radial-gradient(circle, #801818 0%, #121212 100%); width: 100px; height: 100px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; border: 2px solid #c5a85c;">
-                <span style="font-size: 55px; line-height: 1;">☸️</span>
+# ─── ส่วนที่อัปเดตใหม่: ระบบติดตั้ง Web App ───
+    with st.expander("📲 ติดตั้งแอปพลิเคชัน (Web App)", expanded=True):
+        st.markdown("""
+            <p class="sidebar-subtext" style="margin-bottom: 15px;">
+                ท่านสามารถติดตั้ง <b>AI.prapali</b> ลงบนหน้าจอมือถือหรือคอมพิวเตอร์ เพื่อใช้งานได้ทันทีเหมือนแอปพลิเคชันทั่วไป
+            </p>
+        """, unsafe_allow_html=True)
+        
+        # สร้างปุ่มที่ดูเหมือนปุ่มติดตั้งจริง
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🍏 iOS (iPhone)"):
+                st.info("วิธีติดตั้งบน iPhone:\n1. กดปุ่ม 'แชร์' (ไอคอนสี่เหลี่ยมลูกศรขึ้น)\n2. เลือก 'เพิ่มลงในหน้าจอโฮม' (Add to Home Screen)")
+        with col2:
+            if st.button("🤖 Android / PC"):
+                st.info("วิธีติดตั้งบน Android/PC:\n1. กดปุ่ม 'จุด 3 จุด' ที่มุมขวาบนของเบราว์เซอร์\n2. เลือก 'ติดตั้งแอป' (Install App)")
+
+        st.markdown("""
+            <div style="background-color: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px dashed #c5a85c; margin-top: 10px;">
+                <p style="font-size: 11px; color: #c5a85c; text-align: center; margin: 0;">
+                    ✨ ไม่ต้องใช้พื้นที่เก็บข้อมูลเพิ่ม | อัปเดตฟีเจอร์ใหม่อัตโนมัติ ✨
+                </p>
             </div>
-            <h3 style="color: #c5a85c !important; margin-top: 15px; font-weight: bold; margin-bottom: 2px;">คู่มือศึกษาธรรมะ</h3>
-            <p style="font-size: 12px; color: #8b7355 !important; margin-top:0px;">AI.prapali เพื่อพระพุทธศาสนา</p>
-        </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     st.markdown("<hr style='border-color: #2d2d2d;'>", unsafe_allow_html=True)
     
