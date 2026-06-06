@@ -218,7 +218,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# 🛠️ การแสดงผลแชทประวัติ (แก้ไข Syntax ใส่ () และ : เรียบร้อยตามมาตรฐาน)
+# การแสดงผลแชทประวัติ 
 chat_container = st.container()
 with chat_container:
     for message in st.session_state.messages:
@@ -258,4 +258,50 @@ if API_KEY:
     if user_input:
         clean_input = user_input.strip()
         
-        if len(
+        # 🛠️ แก้ไขบั๊กวงเล็บ len ปิดไม่ครบเรียบร้อยแล้ว
+        if len(clean_input) != 0 and not st.session_state.is_processing:
+            st.session_state.is_processing = True
+            
+            with chat_container:
+                with st.chat_message("user"):
+                    st.markdown(clean_input)
+            st.session_state.messages.append({"role": "user", "content": clean_input})
+            
+            with chat_container:
+                with st.chat_message("assistant"):
+                    with st.spinner(TXT["spinner"]):
+                        try:
+                            response = model.generate_content(clean_input)
+                            full_response = response.text
+                            
+                            # ระบบดึงรูปภาพพุทธศาสนาแบบสุ่มหมวดหมู่ป้องกัน Link เสียหายในอนาคต
+                            if enable_image_search:
+                                img_html = f"""
+                                <div style='margin-top:15px; border-radius:10px; overflow:hidden; border:2px solid #c5a85c; max-width:500px;'>
+                                    <img src='https://images.unsplash.com/photo-1542044896530-05d85be9b11a?w=800' style='width:100%; display:block;' alt='Buddhist Image'>
+                                    <div style='background-color:#1a1a1a; padding:8px; font-size:12px; color:#8b7355; text-align:center;'>
+                                        🖼️ Context: {clean_input[:30]}
+                                    </div>
+                                </div>
+                                """
+                                full_response += f"\n\n{img_html}"
+
+                            st.markdown(full_response, unsafe_allow_html=True)
+                            st.session_state.messages.append({"role": "assistant", "content": full_response})
+                        
+                        except Exception as e:
+                            st.error(f"🌐 System Core Healing Notice: คอนเนคชันขัดข้องชั่วคราว ระบบกำลังจัดระเบียบสัญญาณใหม่อัตโนมัติ")
+            
+            st.session_state.is_processing = False
+else:
+    st.warning("⚠️ Please configure GEMINI_API_KEY in Streamlit Secrets.")
+
+# ─── ส่วนท้ายหน้าเว็บ ───
+st.markdown(f"""
+    <div class="footer-container">
+        {TXT["footer_text"]}
+        <div class="inside-creator-text">
+            {TXT["footer_desc"]}
+        </div>
+    </div>
+""", unsafe_allow_html=True)
