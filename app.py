@@ -5,7 +5,7 @@ import streamlit.components.v1 as components
 # 1. ตั้งค่าโครงสร้างหน้าเว็บแบบ Wide และธีม Jenova Style
 st.set_page_config(page_title="AI.prapali - เอไอ พระบาลี", page_icon="🙏", layout="wide")
 
-# 2. ระบบตรวจจับภาษาจาก Browser (แก้ไขป้องกัน Infinite Loop เรียบร้อย)
+# 2. ระบบตรวจจับภาษาจาก Browser
 if "lang_code" not in st.session_state:
     st.session_state.lang_code = "th" 
 
@@ -24,8 +24,7 @@ detected_lang = components.html("""
     </script>
 """, height=0)
 
-# อัปเดตภาษาลง Session โดยตรง ไม่ใช้ st.rerun() ป้องกันหน้าจอค้าง
-if detected_lang and detected_lang in ["th", "en"]:
+if detected_lang and isinstance(detected_lang, str) and detected_lang in ["th", "en"]:
     st.session_state.lang_code = detected_lang
 
 # 3. คลังข้อมูลคำแปล (Dictionary) รองรับการเปลี่ยนภาษาอัตโนมัติทั้งหน้าจอ
@@ -112,7 +111,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ─── ระบบความจำแชทและหน่วยซ่อมแซมตัวเองอัตโนมัติ ───
+# ─── ระบบความจำแชท ───
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "is_processing" not in st.session_state:
@@ -134,7 +133,7 @@ with st.sidebar:
     
     st.markdown("<hr style='border-color: #2d2d2d;'>", unsafe_allow_html=True)
     
-    # ระบบสั่งการด้วยเสียงแบบปลอดภัย
+    # ระบบสั่งการด้วยเสียงแบบสากล
     st.markdown(f"<div class='feature-box'><b>{TXT['voice_box']}</b>", unsafe_allow_html=True)
     
     current_lang_code = st.session_state.lang_code
@@ -180,7 +179,8 @@ with st.sidebar:
         </script>
     """, height=50)
 
-    if voice_component:
+    # 🛠️ จุดป้องกันบั๊กดักจับ Object: สกัดเฉพาะข้อมูลที่เป็นข้อความ (str) เท่านั้น
+    if voice_component and isinstance(voice_component, str) and not voice_component.startswith("DeltaGenerator"):
         st.session_state.voice_text = voice_component
     
     st.markdown("</div>", unsafe_allow_html=True)
@@ -235,17 +235,22 @@ if API_KEY:
     model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=system_prompt)
     
     default_placeholder = TXT["placeholder"]
-    if st.session_state.voice_text:
-        default_placeholder = f"🎙️ Sent from Voice: {st.session_state.voice_text}"
+    
+    # 🛠️ ตรวจสอบความปลอดภัยก่อนนำค่าเสียงมาใส่ในกล่องข้อความ
+    safe_voice = st.session_state.voice_text
+    if safe_voice and isinstance(safe_voice, str) and not safe_voice.startswith("DeltaGenerator"):
+        default_placeholder = f"🎙️ Sent from Voice: {safe_voice}"
+    else:
+        safe_voice = ""
 
     user_input = st.chat_input(default_placeholder)
     
-    if not user_input and st.session_state.voice_text:
+    if not user_input and safe_voice:
         if not st.session_state.is_processing:
-            user_input = st.session_state.voice_text
+            user_input = safe_voice
             st.session_state.voice_text = ""
 
-    if user_input:
+    if user_input and isinstance(user_input, str):
         clean_input = user_input.strip()
         
         if len(clean_input) != 0 and not st.session_state.is_processing:
