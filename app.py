@@ -1,12 +1,11 @@
 import streamlit as st
 import google.generativeai as genai
 import streamlit.components.v1 as components
-import urllib.parse
 
 # 1. ตั้งค่าโครงสร้างหน้าเว็บแบบ Wide และธีม Jenova Style
 st.set_page_config(page_title="AI.prapali - เอไอ พระบาลี", page_icon="🙏", layout="wide")
 
-# 2. ระบบตรวจจับภาษาจาก Browser ของผู้ใช้งาน (Auto Language Detection Component)
+# 2. ระบบตรวจจับภาษาจาก Browser (แก้ไขป้องกัน Infinite Loop เรียบร้อย)
 if "lang_code" not in st.session_state:
     st.session_state.lang_code = "th" 
 
@@ -20,14 +19,14 @@ detected_lang = components.html("""
                 value: shortLang
             }, '*');
         } catch (e) {
-            console.log("Language detection failed, falling back.");
+            console.log("Language detection failed.");
         }
     </script>
 """, height=0)
 
-if detected_lang and detected_lang != st.session_state.lang_code:
+# อัปเดตภาษาลง Session โดยตรง ไม่ใช้ st.rerun() ป้องกันหน้าจอค้าง
+if detected_lang and detected_lang in ["th", "en"]:
     st.session_state.lang_code = detected_lang
-    st.rerun()
 
 # 3. คลังข้อมูลคำแปล (Dictionary) รองรับการเปลี่ยนภาษาอัตโนมัติทั้งหน้าจอ
 LANG_DICT = {
@@ -83,11 +82,10 @@ LANG_DICT = {
     }
 }
 
-# [ระบบซ่อมแซมจุดที่ 1] ป้องกันกรณีรหัสภาษาขัดข้อง ให้ดึงชุดภาษาสากล (en) มาแทนที่ทันที
 try:
-    TXT = LANG_DICT.get(st.session_state.lang_code, LANG_DICT["en"])
+    TXT = LANG_DICT.get(st.session_state.lang_code, LANG_DICT["th"])
 except Exception:
-    TXT = LANG_DICT["en"]
+    TXT = LANG_DICT["th"]
 
 # 4. ปรับแต่ง CSS สำหรับดีไซน์หน้าจอ Dark Gold 
 st.markdown("""
@@ -114,18 +112,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ─── ระบบความจำแชทและหน่วยซ่อมแซมตัวแปรขัดข้องอัตโนมัติ ───
-try:
-    if "messages" not in st.session_state or not isinstance(st.session_state.messages, list):
-        st.session_state.messages = []
-    if "is_processing" not in st.session_state:
-        st.session_state.is_processing = False
-    if "voice_text" not in st.session_state:
-        st.session_state.voice_text = ""
-except Exception:
-    st.session_state.clear()
+# ─── ระบบความจำแชทและหน่วยซ่อมแซมตัวเองอัตโนมัติ ───
+if "messages" not in st.session_state:
     st.session_state.messages = []
+if "is_processing" not in st.session_state:
     st.session_state.is_processing = False
+if "voice_text" not in st.session_state:
     st.session_state.voice_text = ""
 
 # ─── แถบเมนูด้านข้าง (Sidebar) ───
@@ -142,7 +134,7 @@ with st.sidebar:
     
     st.markdown("<hr style='border-color: #2d2d2d;'>", unsafe_allow_html=True)
     
-    # ระบบสั่งการด้วยเสียงแบบสากล
+    # ระบบสั่งการด้วยเสียงแบบปลอดภัย
     st.markdown(f"<div class='feature-box'><b>{TXT['voice_box']}</b>", unsafe_allow_html=True)
     
     current_lang_code = st.session_state.lang_code
@@ -218,7 +210,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# การแสดงผลแชทประวัติ 
+# การแสดงผลแชทประวัติ
 chat_container = st.container()
 with chat_container:
     for message in st.session_state.messages:
@@ -240,8 +232,6 @@ if API_KEY:
     )
     
     genai.configure(api_key=API_KEY)
-    
-    # เรียกใช้โมเดลความเร็วสูงเจเนอเรชันล่าสุดอย่างมีเสถียรภาพ
     model = genai.GenerativeModel('gemini-3.5-flash', system_instruction=system_prompt)
     
     default_placeholder = TXT["placeholder"]
@@ -258,7 +248,6 @@ if API_KEY:
     if user_input:
         clean_input = user_input.strip()
         
-        # 🛠️ แก้ไขบั๊กวงเล็บ len ปิดไม่ครบเรียบร้อยแล้ว
         if len(clean_input) != 0 and not st.session_state.is_processing:
             st.session_state.is_processing = True
             
@@ -274,7 +263,6 @@ if API_KEY:
                             response = model.generate_content(clean_input)
                             full_response = response.text
                             
-                            # ระบบดึงรูปภาพพุทธศาสนาแบบสุ่มหมวดหมู่ป้องกัน Link เสียหายในอนาคต
                             if enable_image_search:
                                 img_html = f"""
                                 <div style='margin-top:15px; border-radius:10px; overflow:hidden; border:2px solid #c5a85c; max-width:500px;'>
@@ -290,7 +278,7 @@ if API_KEY:
                             st.session_state.messages.append({"role": "assistant", "content": full_response})
                         
                         except Exception as e:
-                            st.error(f"🌐 System Core Healing Notice: คอนเนคชันขัดข้องชั่วคราว ระบบกำลังจัดระเบียบสัญญาณใหม่อัตโนมัติ")
+                            st.error(f"🌐 System Core Healing Notice: คอนเนคชันขัดข้องชั่วคราว กำลังจัดระเบียบสัญญาณใหม่อัตโนมัติ")
             
             st.session_state.is_processing = False
 else:
