@@ -232,7 +232,7 @@ if API_KEY:
     )
     
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-3.5-flash', system_instruction=system_prompt)
+    model = genai.GenerativeModel('gemini-2.5-flash', system_instruction=system_prompt)
     
     default_placeholder = TXT["placeholder"]
     if st.session_state.voice_text:
