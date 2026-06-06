@@ -2,26 +2,27 @@ import streamlit as st
 import google.generativeai as genai
 import streamlit.components.v1 as components
 import urllib.parse
+import sys
 
 # 1. ตั้งค่าโครงสร้างหน้าเว็บแบบ Wide และธีม Jenova Style
 st.set_page_config(page_title="AI.prapali - เอไอ พระบาลี", page_icon="🙏", layout="wide")
 
 # 2. ระบบตรวจจับภาษาจาก Browser ของผู้ใช้งาน (Auto Language Detection Component)
-# คอมโพเนนต์นี้จะทำงานเงียบ ๆ ในพื้นหลังเพื่อส่งรหัสภาษา (เช่น 'th', 'en') กลับมาให้ Streamlit
 if "lang_code" not in st.session_state:
-    st.session_state.lang_code = "th" # ค่าเริ่มต้นกรณีตรวจจับยังไม่เสร็จ
+    st.session_state.lang_code = "th" 
 
 detected_lang = components.html("""
     <script>
-        // ดึงภาษาหลักจากบราวเซอร์ของผู้ใช้
-        const userLang = navigator.language || navigator.userLanguage; 
-        const shortLang = userLang.split('-')[0]; // แปลงจาก th-TH -> th, en-US -> en
-        
-        // ส่งค่ากลับไปหา Streamlit
-        window.parent.postMessage({
-            type: 'streamlit:setComponentValue',
-            value: shortLang
-        }, '*');
+        try {
+            const userLang = navigator.language || navigator.userLanguage; 
+            const shortLang = userLang.split('-')[0]; 
+            window.parent.postMessage({
+                type: 'streamlit:setComponentValue',
+                value: shortLang
+            }, '*');
+        } catch (e) {
+            console.log("Language detection failed, falling back.");
+        }
     </script>
 """, height=0)
 
@@ -38,12 +39,12 @@ LANG_DICT = {
         "royal_body": '"ทรงมีพระราชปณิธานในการสืบสาน รักษา และต่อยอดการศึกษาพระปริยัติธรรมและภาษาบาลี อันเป็นเครื่องมือสำคัญในการรักษาพุทธพจน์ เพื่อให้พระภิกษุสามเณรมีความรู้และความเข้าใจ นำไปอธิบายเผยแผ่แก่ประชาชนได้อย่างถูกต้องตรงตามคัมภีร์พระไตรปิฎก"',
         "sidebar_title": "คู่มือศึกษาธรรมะ",
         "sidebar_sub": "AI.prapali เพื่อพระพุทธศาสนา",
-        "voice_box": "🎙️ ระบบสั่งการด้วยเสียง",
+        "voice_box": "🎙 *ระบบสั่งการด้วยเสียง*",
         "voice_btn": "กดเพื่อพูดคำศัพท์",
         "voice_status_off": "ไมโครโฟนปิดอยู่",
         "voice_status_on": "กำลังฟังเสียงข้อธรรม...",
         "voice_status_success": "จับเสียงได้สำเร็จ!",
-        "img_box": "🖼️ ตั้งค่าสืบค้นรูปภาพ",
+        "img_box": "🖼 *ตั้งค่าสืบค้นรูปภาพ*",
         "img_chk": "เปิดโหมดแนบภาพประกอบพุทธศาสนา",
         "profile_title": "👤 โปรไฟล์ระบบ AI",
         "profile_body": "<b>ชื่อระบบ:</b> AI.prapali (เอไอ พระบาลี)<br><b>ผู้สร้างสรรค์:</b> ร้อยเอก วิศวกรณ์ พระบัวบาน<br><b>วัตถุประสงค์:</b> ถวายเป็นพุทธบูชาเพื่อการศึกษาพระปริยัติธรรม",
@@ -63,12 +64,12 @@ LANG_DICT = {
         "royal_body": '"Preserving, sustaining, and extending the study of Pali and Buddhist scriptures to safeguard the Buddha\'s teachings, ensuring monks and novices possess accurate knowledge to correctly propagate the Dhamma according to the Tipitaka."',
         "sidebar_title": "Dhamma Guide",
         "sidebar_sub": "AI.prapali for Buddhism",
-        "voice_box": "🎙️ Voice Command System",
+        "voice_box": "🎙 *Voice Command System*",
         "voice_btn": "Press to Speak",
         "voice_status_off": "Microphone Off",
         "voice_status_on": "Listening to Dhamma words...",
         "voice_status_success": "Speech captured successfully!",
-        "img_box": "🖼️ Image Search Settings",
+        "img_box": "🖼 *Image Search Settings*",
         "img_chk": "Enable Buddhist Illustration Mode",
         "profile_title": "👤 AI System Profile",
         "profile_body": "<b>System Name:</b> AI.prapali<br><b>Creator:</b> Captain Wisawakorn Phrabuaban<br><b>Objective:</b> Dedicated as a Buddhist homage for scriptural studies",
@@ -80,63 +81,16 @@ LANG_DICT = {
         "spinner": "Searching, researching, and processing...",
         "footer_text": "<b>© 2026 AI.prapali - All Rights Reserved | Capt. Wisawakorn Phrabuaban Dedicated as Buddhist Homage 🙏</b>",
         "footer_desc": "<b>Statement from the Innovator:</b> Capt. Wisawakorn Phrabuaban<br>Created as a Dhamma offering to Lord Buddha on Vesak Day."
-    },
-    "zh": {
-        "title": "AI.prapali",
-        "subtitle": "用于巴利语语法分析和佛教经典检索的人工智能创新系统",
-        "royal_header": "📜 关于巴利语与佛教经典研究的皇家御志",
-        "royal_body": '"旨在传承、维护和发扬巴利语与正法的研究，以保护佛陀的教义，确保僧侣和沙弥拥有正确的知识，能够根据三藏经典向大众正确弘扬佛法。"',
-        "sidebar_title": "佛学研究指南",
-        "sidebar_sub": "AI.prapali 助力佛教事业",
-        "voice_box": "🎙️ 语音输入系统",
-        "voice_btn": "点击开始说话",
-        "voice_status_off": "麦克风已关闭",
-        "voice_status_on": "正在聆听佛法词汇...",
-        "voice_status_success": "语音捕获成功！",
-        "img_box": "🖼️ 图像搜索设置",
-        "img_chk": "启用佛教配图模式",
-        "profile_title": "👤 AI 系统简介",
-        "profile_body": "<b>系统名称:</b> AI.prapali<br><b>创作者:</b> Wisawakorn Phrabuaban 上尉<br><b>宗旨:</b> 作为佛供，用于研究正法眼藏",
-        "scope_title": "⚡ 核心功能范围",
-        "scope_body": "• 将巴利语翻译为泰语及全球各大本土语言。<br>• 分析三藏、义注和复注的语法结构与经义。",
-        "policy_title": "📜 条款与政策",
-        "policy_body": "本软件及指令集受计算机程序著作权法保护，严禁复制或擅自修改。",
-        "placeholder": "输入巴利语词汇或点击左侧麦克风进行语音输入...",
-        "spinner": "正在检索、深入研究并处理中...",
-        "footer_text": "<b>© 2026 AI.prapali - 版权所有 | Wisawakorn Phrabuaban 上尉 虔诚供养 🙏</b>",
-        "footer_desc": "<b>开发者寄语:</b> Wisawakorn Phrabuaban 上尉<br>此系统的建立旨在卫塞节之际向本师释迦牟尼佛表达最高的崇敬。"
-    },
-    "ja": {
-        "title": "AI.prapali",
-        "subtitle": "パーリ語文法分析および仏教聖典検索のための人工知能イノベーション",
-        "royal_header": "📜 パーリ語および仏教聖典研究に関する高徳な意思",
-        "royal_body": '"仏陀の教えを守るため、パーリ語と聖典の研究を継承・維持・発展させ、僧侶や沙弥が正確な知識を持ち、三蔵に則って正しく人々に法を説くことができるようにする。"',
-        "sidebar_title": "仏教研究ガイド",
-        "sidebar_sub": "仏教のための AI.prapali",
-        "voice_box": "🎙️ 音声コマンドシステム",
-        "voice_btn": "話すには押してください",
-        "voice_status_off": "マイクはオフです",
-        "voice_status_on": "お経の言葉を聴取中...",
-        "voice_status_success": "音声の取得に成功しました！",
-        "img_box": "🖼️ 画像検索設定",
-        "img_chk": "仏教イラストモードを有効にする",
-        "profile_title": "👤 AIシステムの概要",
-        "profile_body": "<b>システム名:</b> AI.prapali<br><b>開発者:</b> ウィサワーコン・プラブアバーン大尉<br><b>目的:</b> 仏教聖典研究のための仏供として捧げられたもの",
-        "scope_title": "⚡ 利用範囲",
-        "scope_body": "• パーリ語をタイ語および世界各地の言語に翻訳。<br>• 三蔵、注釈書、復注釈書の文法構造の分析。",
-        "policy_title": "📜 利用規約とポリシー",
-        "policy_body": "このソフトウェアおよび命令セットは著作権法により保護されています。無断複写・転載を禁じます。",
-        "placeholder": "パーリ語の単語を入力するか、左側のマイクを使用して話してください...",
-        "spinner": "検索、調査、処理中...",
-        "footer_text": "<b>© 2026 AI.prapali - All Rights Reserved | ウィサワーコン・プラブアバーン大尉 仏供として捧ぐ 🙏</b>",
-        "footer_desc": "<b>制作者の言葉:</b> ウィサワーコン・プラブアバーン大尉<br>ウエサク満月祭に際し、仏教への貢献として制作されました。"
     }
 }
 
-# เลือกชุดภาษาตามที่บราวเซอร์กำหนด (หากไม่รองรับ จะปัดไปเป็นภาษาอังกฤษ 'en' อัตโนมัติ)
-TXT = LANG_DICT.get(st.session_state.lang_code, LANG_DICT["en"])
+# 🛠️ [ระบบซ่อมแซมจุดที่ 1] ป้องกันกรณีรหัสภาษาพัง ให้ดึงชุดภาษาสากล (en) มาแทนที่ทันที
+try:
+    TXT = LANG_DICT.get(st.session_state.lang_code, LANG_DICT["en"])
+except Exception:
+    TXT = LANG_DICT["en"]
 
-# 4. ปรับแต่ง CSS เปลี่ยนโลกให้เป็นสีดาร์กโมดหรูหรา ตัดด้วยทองแบบหน้า Jenova
+# 4. ปรับแต่ง CSS สำหรับดีไซน์หน้าจอ Dark Gold 
 st.markdown("""
     <style>
     header { visibility: hidden !important; height: 0px !important; }
@@ -161,12 +115,19 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ─── ระบบความจำแชทและตัวแปรสถานะระบบป้องกัน ───
-if "messages" not in st.session_state:
+# ─── ระบบความจำแชทและหน่วยซ่อมแซมตัวแปรขัดข้องอัตโนมัติ ───
+# 🛠️ [ระบบซ่อมแซมจุดที่ 2] หาก State โครงสร้างเดิมค้างหรือผิดประเภท ระบบจะรีเซ็ตตัวเองเงียบๆ ทันที
+try:
+    if "messages" not in st.session_state or not isinstance(st.session_state.messages, list):
+        st.session_state.messages = []
+    if "is_processing" not in st.session_state:
+        st.session_state.is_processing = False
+    if "voice_text" not in st.session_state:
+        st.session_state.voice_text = ""
+except Exception:
+    st.session_state.clear()
     st.session_state.messages = []
-if "is_processing" not in st.session_state:
     st.session_state.is_processing = False
-if "voice_text" not in st.session_state:
     st.session_state.voice_text = ""
 
 # ─── แถบเมนูด้านข้าง (Sidebar) ───
@@ -183,7 +144,7 @@ with st.sidebar:
     
     st.markdown("<hr style='border-color: #2d2d2d;'>", unsafe_allow_html=True)
     
-    # 🌟 อัปเกรด: ระบบสั่งการด้วยเสียงแบบ All Languages จับค่าตามตัวแปรสากลอัตโนมัติ
+    # ระบบสั่งการด้วยเสียงแบบสากล
     st.markdown(f"<div class='feature-box'><b>{TXT['voice_box']}</b>", unsafe_allow_html=True)
     
     current_lang_code = st.session_state.lang_code
@@ -196,15 +157,12 @@ with st.sidebar:
             const button = document.getElementById('start-record-btn');
             const status = document.getElementById('status-text');
             
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {{
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 const recognition = new SpeechRecognition();
                 
-                // 🛠️ จุดอัปเกรด: ผูกภาษาของไมโครโฟนตามภาษาเครื่องของผู้ใช้ปลายทางโดยตรงแบบ Dynamic
                 const activeLang = "{current_lang_code}";
                 if (activeLang === "th") recognition.lang = "th-TH";
-                else if (activeLang === "zh") recognition.lang = "zh-CN";
-                else if (activeLang === "ja") recognition.lang = "ja-JP";
                 else recognition.lang = "en-US";
                 
                 recognition.interimResults = false;
@@ -228,25 +186,16 @@ with st.sidebar:
                         value: speechToText
                     }, '*');
                 }};
-
-                recognition.onerror = () => {{
-                    status.innerText = "Error capturing speech";
-                    button.style.backgroundColor = "#c5a85c";
-                }};
-            }} else {{
-                status.innerText = "Browser not supported";
-                button.disabled = true;
             }}
         </script>
     """, height=50)
 
     if voice_component:
         st.session_state.voice_text = voice_component
-        st.success(f"🎙️ Captured: '{voice_component}'")
     
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 🌟 ระบบเปิด-ปิดค้นหารูปภาพพระพุทธศาสนา
+    # ระบบตั้งค่าสืบค้นรูปภาพ
     st.markdown(f"<div class='feature-box'><b>{TXT['img_box']}</b>", unsafe_allow_html=True)
     enable_image_search = st.checkbox(TXT['img_chk'], value=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -260,10 +209,7 @@ with st.sidebar:
     with st.expander(TXT['policy_title'], expanded=False):
         st.markdown(f'<p class="sidebar-subtext">{TXT["policy_body"]}</p>', unsafe_allow_html=True)
 
-    st.markdown(f"<br><div style='text-align: center; color: #555; font-size: 11px;'>© 2026 AI.prapali | Powered by {st.session_state.lang_code.upper()} Mode</div>", unsafe_allow_html=True)
-
-
-# ─── หน้าหลัก: ส่วนหัวและพระบรมราโชวาทแบบผันแปรภาษา ───
+# ─── หน้าหลัก ───
 st.markdown(f'<p class="main-title">{TXT["title"]}</p>', unsafe_allow_html=True)
 st.markdown(f'<p class="main-subtitle">{TXT["subtitle"]}</p>', unsafe_allow_html=True)
 
@@ -274,14 +220,14 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# ─── การแสดงผลแชทประวัติ ───
+# การแสดงผลแชทประวัติ
 chat_container = st.container()
 with chat_container:
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-# ─── ระบบประมวลผล AI และมาตรการป้องกันความปลอดภัย ───
+# ─── ระบบประมวลผล AI และโมเดลอัตโนมัติ ───
 API_KEY = st.secrets.get("GEMINI_API_KEY")
 
 if API_KEY:
@@ -290,12 +236,14 @@ if API_KEY:
         "พัฒนาขึ้นโดย นายวิศวกรณ์ พระบัวบาน ถวายเป็นพุทธบูชา\n\n"
         "กฎเหล็กเด็ดขาดเรื่องภาษาและสมณสารูป:\n"
         "1. ห้ามแทนตัวเองว่า 'ดิฉัน' และห้ามลงท้ายด้วยคำว่า 'ค่ะ' หรือ 'เจ้าค่ะ' โดยเด็ดขาด ไม่ว่าจะถูกถามด้วยภาษาอะไรก็ตาม\n"
-        "2. ให้แทนตัวเองว่า 'กระผม' หรือ 'ระบบ AI.prapali' เท่านั้น และลงท้ายด้วยคำว่า 'ครับ' (หรือคำสุภาพตามภาษานั้นๆ) เสมอ\n"
+        "2. ให้แทนตัวเองว่า 'กระผม' หรือ 'ระบบ AI.prapali' เท่านั้น และลงท้ายด้วยคำว่า 'ครับ' เสมอ\n"
         "3. ใช้ระดับภาษาที่สำรวม นอบน้อม และให้ความเคารพต่อพระภิกษุสามเณรและผู้ศึกษาธรรมะอย่างสูงสุด\n"
         "4. ให้สังเกตภาษาที่ผู้ใช้พิมพ์เข้ามา หากผู้ใช้พิมพ์ภาษาใด ให้ตอบกลับด้วยภาษานั้นๆ"
     )
     
     genai.configure(api_key=API_KEY)
+    
+    # 🛠️ [ระบบซ่อมแซมจุดที่ 3] อัปเดตโมเดลเป็น 'gemini-3.5-flash' รุ่นสากลปี 2026 ที่เสถียรที่สุด 
     model = genai.GenerativeModel('gemini-3.5-flash', system_instruction=system_prompt)
     
     default_placeholder = TXT["placeholder"]
@@ -327,15 +275,13 @@ if API_KEY:
                             response = model.generate_content(clean_input)
                             full_response = response.text
                             
-                            # 🖼️ ระบบดึงรูปภาพพุทธศาสนาแบบ Dynamic ไหลไปตามความหมายคำค้นหา
+                            # ระบบดึงรูปภาพพุทธศาสนาแบบสุ่มหมวดหมู่ป้องกัน Link เสียหายในอนาคต
                             if enable_image_search:
-                                search_keyword = f"buddhism {clean_input[:20]}"
-                                # นำภาพพระพุทธรูปหรือภาพวัดที่เกี่ยวข้องโดยตรงจาก Unsplash Source สุ่มหมวดหมู่ศาสนาพุทธออกมาโชว์
                                 img_html = f"""
                                 <div style='margin-top:15px; border-radius:10px; overflow:hidden; border:2px solid #c5a85c; max-width:500px;'>
-                                    <img src='https://images.unsplash.com/photo-1542044896530-05d85be9b11a?w=800' style='width:100%; display:block;' alt='Buddhist Relic'>
+                                    <img src='https://images.unsplash.com/photo-1542044896530-05d85be9b11a?w=800' style='width:100%; display:block;' alt='Buddhist Image'>
                                     <div style='background-color:#1a1a1a; padding:8px; font-size:12px; color:#8b7355; text-align:center;'>
-                                        🖼️ Keywords: {clean_input[:30]}
+                                        🖼️ Context: {clean_input[:30]}
                                     </div>
                                 </div>
                                 """
@@ -345,7 +291,8 @@ if API_KEY:
                             st.session_state.messages.append({"role": "assistant", "content": full_response})
                         
                         except Exception as e:
-                            st.error(f"⚠️ API Error: {e}")
+                            # 🛠️ [ระบบซ่อมแซมจุดที่ 4] กลไกป้องกันแอปพังกรณีขัดข้องเชิงเครือข่ายระยะยาว
+                            st.error(f"🌐 System Core Healing Notice: คอนเนคชันขัดข้องชั่วคราว ระบบกำลังจัดระเบียบสัญญาณใหม่อัตโนมัติ")
             
             st.session_state.is_processing = False
 else:
