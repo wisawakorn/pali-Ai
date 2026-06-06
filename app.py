@@ -23,7 +23,7 @@ if API_KEY:
 # ==============================================================================
 # 2. ปรับแต่งสไตล์ (Font Scaling & Layout Adjustment)
 # ==============================================================================
-st.set_page_config(page_title="AI.prapali", page_icon="🙏", layout="wide")
+st.set_page_config(page_title="AI.prapali", page_icon="☸️", layout="wide")
 
 st.markdown("""
     <style>
