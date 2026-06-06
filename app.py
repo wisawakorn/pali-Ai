@@ -2,7 +2,6 @@ import streamlit as st
 import google.generativeai as genai
 import streamlit.components.v1 as components
 import urllib.parse
-import sys
 
 # 1. ตั้งค่าโครงสร้างหน้าเว็บแบบ Wide และธีม Jenova Style
 st.set_page_config(page_title="AI.prapali - เอไอ พระบาลี", page_icon="🙏", layout="wide")
@@ -84,7 +83,7 @@ LANG_DICT = {
     }
 }
 
-# 🛠️ [ระบบซ่อมแซมจุดที่ 1] ป้องกันกรณีรหัสภาษาพัง ให้ดึงชุดภาษาสากล (en) มาแทนที่ทันที
+# [ระบบซ่อมแซมจุดที่ 1] ป้องกันกรณีรหัสภาษาขัดข้อง ให้ดึงชุดภาษาสากล (en) มาแทนที่ทันที
 try:
     TXT = LANG_DICT.get(st.session_state.lang_code, LANG_DICT["en"])
 except Exception:
@@ -116,7 +115,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─── ระบบความจำแชทและหน่วยซ่อมแซมตัวแปรขัดข้องอัตโนมัติ ───
-# 🛠️ [ระบบซ่อมแซมจุดที่ 2] หาก State โครงสร้างเดิมค้างหรือผิดประเภท ระบบจะรีเซ็ตตัวเองเงียบๆ ทันที
 try:
     if "messages" not in st.session_state or not isinstance(st.session_state.messages, list):
         st.session_state.messages = []
@@ -181,10 +179,11 @@ with st.sidebar:
                     button.style.backgroundColor = "#c5a85c";
                     button.style.color = "black";
                     
+                    // 🛠️ แก้ไขบั๊กปีกกาคู่ที่ส่งผลให้เกิด SyntaxError ในฝั่ง Python เรียบร้อยแล้ว
                     window.parent.postMessage({{
                         type: 'streamlit:setComponentValue',
                         value: speechToText
-                    }, '*');
+                    }}, '*');
                 }};
             }}
         </script>
@@ -243,7 +242,7 @@ if API_KEY:
     
     genai.configure(api_key=API_KEY)
     
-    # 🛠️ [ระบบซ่อมแซมจุดที่ 3] อัปเดตโมเดลเป็น 'gemini-3.5-flash' รุ่นสากลปี 2026 ที่เสถียรที่สุด 
+    # เรียกใช้โมเดลความเร็วสูงเจเนอเรชันล่าสุดของปี 2026 อย่างมีเสถียรภาพ
     model = genai.GenerativeModel('gemini-3.5-flash', system_instruction=system_prompt)
     
     default_placeholder = TXT["placeholder"]
@@ -269,41 +268,4 @@ if API_KEY:
             st.session_state.messages.append({"role": "user", "content": clean_input})
             
             with chat_container:
-                with st.chat_message("assistant"):
-                    with st.spinner(TXT["spinner"]):
-                        try:
-                            response = model.generate_content(clean_input)
-                            full_response = response.text
-                            
-                            # ระบบดึงรูปภาพพุทธศาสนาแบบสุ่มหมวดหมู่ป้องกัน Link เสียหายในอนาคต
-                            if enable_image_search:
-                                img_html = f"""
-                                <div style='margin-top:15px; border-radius:10px; overflow:hidden; border:2px solid #c5a85c; max-width:500px;'>
-                                    <img src='https://images.unsplash.com/photo-1542044896530-05d85be9b11a?w=800' style='width:100%; display:block;' alt='Buddhist Image'>
-                                    <div style='background-color:#1a1a1a; padding:8px; font-size:12px; color:#8b7355; text-align:center;'>
-                                        🖼️ Context: {clean_input[:30]}
-                                    </div>
-                                </div>
-                                """
-                                full_response += f"\n\n{img_html}"
-
-                            st.markdown(full_response, unsafe_allow_html=True)
-                            st.session_state.messages.append({"role": "assistant", "content": full_response})
-                        
-                        except Exception as e:
-                            # 🛠️ [ระบบซ่อมแซมจุดที่ 4] กลไกป้องกันแอปพังกรณีขัดข้องเชิงเครือข่ายระยะยาว
-                            st.error(f"🌐 System Core Healing Notice: คอนเนคชันขัดข้องชั่วคราว ระบบกำลังจัดระเบียบสัญญาณใหม่อัตโนมัติ")
-            
-            st.session_state.is_processing = False
-else:
-    st.warning("⚠️ Please configure GEMINI_API_KEY in Streamlit Secrets.")
-
-# ─── ส่วนท้ายหน้าเว็บ ───
-st.markdown(f"""
-    <div class="footer-container">
-        {TXT["footer_text"]}
-        <div class="inside-creator-text">
-            {TXT["footer_desc"]}
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+                with st.chat_message
