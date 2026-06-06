@@ -179,7 +179,6 @@ with st.sidebar:
                     button.style.backgroundColor = "#c5a85c";
                     button.style.color = "black";
                     
-                    // 🛠️ แก้ไขบั๊กปีกกาคู่ที่ส่งผลให้เกิด SyntaxError ในฝั่ง Python เรียบร้อยแล้ว
                     window.parent.postMessage({{
                         type: 'streamlit:setComponentValue',
                         value: speechToText
@@ -219,7 +218,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# การแสดงผลแชทประวัติ
+# 🛠️ การแสดงผลแชทประวัติ (แก้ไข Syntax ใส่ () และ : เรียบร้อยตามมาตรฐาน)
 chat_container = st.container()
 with chat_container:
     for message in st.session_state.messages:
@@ -242,7 +241,7 @@ if API_KEY:
     
     genai.configure(api_key=API_KEY)
     
-    # เรียกใช้โมเดลความเร็วสูงเจเนอเรชันล่าสุดของปี 2026 อย่างมีเสถียรภาพ
+    # เรียกใช้โมเดลความเร็วสูงเจเนอเรชันล่าสุดอย่างมีเสถียรภาพ
     model = genai.GenerativeModel('gemini-3.5-flash', system_instruction=system_prompt)
     
     default_placeholder = TXT["placeholder"]
@@ -259,13 +258,4 @@ if API_KEY:
     if user_input:
         clean_input = user_input.strip()
         
-        if len(clean_input) != 0 and not st.session_state.is_processing:
-            st.session_state.is_processing = True
-            
-            with chat_container:
-                with st.chat_message("user"):
-                    st.markdown(clean_input)
-            st.session_state.messages.append({"role": "user", "content": clean_input})
-            
-            with chat_container:
-                with st.chat_message
+        if len(
