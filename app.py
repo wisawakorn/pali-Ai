@@ -21,7 +21,7 @@ if API_KEY:
 def generate_with_retry_legacy(input_text, max_retries=3):
     # ใช้โมเดลตระกูล 1.5 ที่เสถียรที่สุดบนโครงสร้างเดิม
     model = genai.GenerativeModel(
-        model_name='gemini-2.5-flash',
+        model_name='gemini-3.1-flash',
         system_instruction=system_prompt
     )
     
