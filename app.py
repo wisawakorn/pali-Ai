@@ -34,7 +34,7 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 3. ปรับแต่งสไตล์ CSS (ธีมดำ-ทอง Jenova Style + ซ่อนส่วนเกิน + กล่องสนับสนุน)
+# 3. ปรับแต่งสไตล์ CSS (ธีมดำ-ทอง Jenova Style + ซ่อนส่วนเกิน + กล่องสนับสนุนกว้างเท่ากล่องบน)
 # ==============================================================================
 st.markdown("""
 <style>
@@ -75,7 +75,7 @@ footer { visibility: hidden !important; }
     line-height: 1.6; 
 }
 
-/* การ์ดสนับสนุนและช่องทางติดต่อ */
+/* การ์ดสนับสนุนและช่องทางติดต่อ ปรับความกว้างเป็น 800px เท่ากับกล่องด้านบน */
 .support-card {
     background-color: #1a1a1a;
     border: 1px solid #2d2d2d;
@@ -83,7 +83,7 @@ footer { visibility: hidden !important; }
     padding: 20px;
     border-radius: 12px;
     text-align: center;
-    max-width: 600px;
+    max-width: 800px;
     margin: 30px auto 10px auto;
 }
 .support-link {
@@ -167,10 +167,10 @@ if user_input := st.chat_input("พิมพ์คำศัพท์หรือ
                 except Exception as e:
                     st.error(f"⚠️ เกิดข้อผิดพลาดจากระบบ AI Engine: {e}")
         else:
-            st.error("⚠️ ไม่พบระบบสัญญาน API: กรุณาตรวจสอบว่าได้ตั้งค่าคีย์ความลับ 'GEMINI_API_KEY' ในหน้า Settings ของ Hugging Face แล้วหรือยังครับ")
+            st.error("⚠️ ไม่พบระบบสัญญาน API: กรุณาตรวจสอบว่าได้ตั้งค่าคีย์ความลับ 'GEMINI_API_KEY' ในหน้า Settings แล้วหรือยังครับ")
 
 # ==============================================================================
-# 6. ส่วนสนับสนุนเพื่อความยั่งยืนของระบบ และข้อเสนอแนะ (ปรับกรอบธนาคารแนวยาว+กดดูได้)
+# 6. ส่วนสนับสนุนเพื่อความยั่งยืนของระบบ และข้อเสนอแนะ (เพิ่มปุ่ม Facebook เรียบร้อย)
 # ==============================================================================
 st.markdown("""
 <div class="support-card">
@@ -182,13 +182,13 @@ st.markdown("""
 ในการขับเคลื่อนระบบ AI.prapali ให้เปิดสแตนด์บายทำหน้าที่สืบทอดพุทธพจน์ตลอด 24 ชั่วโมงอย่างยั่งยืน"
 </div>
 
-<!-- กล่องข้อมูลธนาคารดีไซน์แนวยาวแบบกดคลิกเพื่อเปิดดูเลขบัญชี -->
-<details style="background-color: #161616; border: 1px solid #2d2d2d; border-left: 4px solid #c5a85c; padding: 8px 15px; border-radius: 6px; margin: 0 auto 15px auto; max-width: 460px; text-align: left; cursor: pointer;">
-<summary style="color: #c5a85c; font-size: 13px; font-weight: bold; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+<!-- กล่องข้อมูลธนาคารดีไซน์แนวยาวขยายเต็มพื้นที่กล่องนอก (max-width: 100%) -->
+<details style="background-color: #161616; border: 1px solid #2d2d2d; border-left: 4px solid #c5a85c; padding: 12px 20px; border-radius: 6px; margin: 0 auto 15px auto; max-width: 100%; text-align: left; cursor: pointer;">
+<summary style="color: #c5a85c; font-size: 14px; font-weight: bold; list-style: none; display: flex; justify-content: space-between; align-items: center;">
 <span>🏦 ธนาคารกรุงศรีอยุธยา (คลิกเพื่อดูเลขบัญชี...)</span>
-<span style="font-size: 11px; color: #8b7355;">▼ กดดูเลข</span>
+<span style="font-size: 12px; color: #8b7355;">▼ กดดูเลข</span>
 </summary>
-<div style="margin-top: 8px; border-top: 1px solid #2d2d2d; padding-top: 8px;">
+<div style="margin-top: 10px; border-top: 1px solid #2d2d2d; padding-top: 10px;">
 <div style="color: #ffffff; font-size: 16px; font-weight: 800; letter-spacing: 1px; margin-bottom: 3px;">เลขที่บัญชี: 777-438496-0</div>
 <div style="color: #e0e0e0; font-size: 13px;">ชื่อบัญชี: นายวิศวกรณ์ พระบัวบาน</div>
 </div>
@@ -199,6 +199,7 @@ st.markdown("""
 <div style="color: #8b7355; font-size: 12px; margin-bottom: 8px;">📞 ติดต่อผู้พัฒนา / ให้ข้อชีแนะเพิ่มเติม:</div>
 <a class="support-link" href="tel:0644518043" style="margin: 0 15px;">📱 โทร: 064-4518043</a>
 <a class="support-link" href="mailto:wissawakorn444@gmail.com" style="margin: 0 15px;">✉️ อีเมล: wissawakorn444@gmail.com</a>
+<a class="support-link" href="https://www.facebook.com/emey.za196/" target="_blank" style="margin: 0 15px;">🔵 Facebook</a>
 </div>
 </div>
 """, unsafe_allow_html=True)
