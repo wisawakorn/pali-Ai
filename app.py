@@ -1,10 +1,9 @@
 import streamlit as st
 import os
 import time
-import google.generativeai as genai
 
 # ==============================================================================
-# 1. ระบบ AI Engine (ใช้ Library เดิมที่ระบบรองรับ + ระบบวนลูปสู้ Error 503)
+# 1. ระบบ AI Engine ไฮบริดอัจฉริยะ (ตรวจจับเวอร์ชันไลบรารีอัตโนมัติ)
 # ==============================================================================
 API_KEY = os.environ.get("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY", None)
 
@@ -14,30 +13,52 @@ system_prompt = (
     "เชี่ยวชาญด้านประวัติศาสตร์ ภาษาบาลี พระไตรปิฎก และศิลปะวัฒนธรรมท้องถิ่นอย่างลึกซึ้ง"
 )
 
-if API_KEY:
-    genai.configure(api_key=API_KEY)
+USE_NEW_SDK = False
+client = None
 
-# ฟังก์ชันความอดทนสูง วนลูปส่งใหม่หากเจอสัญญาณ 503 หรืองานหนาแน่น
-def generate_with_retry_legacy(input_text, max_retries=3):
-    # ใช้โมเดลตระกูล 1.5 ที่เสถียรที่สุดบนโครงสร้างเดิม
-    model = genai.GenerativeModel(
-        model_name='gemini-3.1-flash',
-        system_instruction=system_prompt
-    )
-    
+# ระบบคัดกรองตัวเชื่อมต่ออัตโนมัติเพื่อป้องกัน ModuleNotFoundError
+try:
+    from google import genai
+    from google.genai import types
+    if API_KEY:
+        client = genai.Client(api_key=API_KEY)
+    USE_NEW_SDK = True
+except (ImportError, ModuleNotFoundError):
+    try:
+        import google.generativeai as genai_legacy
+        if API_KEY:
+            genai_legacy.configure(api_key=API_KEY)
+        USE_NEW_SDK = False
+    except (ImportError, ModuleNotFoundError):
+        st.error("⚠️ ไม่พบระบบเชื่อมต่อหลักในระบบขับเคลื่อน กรุณาตรวจสอบไฟล์ requirements.txt")
+
+# ฟังก์ชันต้านทาน Error 503 ทำงานรองรับทั้งสองเวอร์ชัน
+def generate_with_retry_hybrid(input_text, max_retries=4):
     for i in range(max_retries):
         try:
-            response = model.generate_content(input_text)
-            return response.text
+            if USE_NEW_SDK:
+                response = client.models.generate_content(
+                    model='gemini-3.5-flash',
+                    contents=input_text,
+                    config=types.GenerateContentConfig(system_instruction=system_prompt)
+                )
+                return response.text
+            else:
+                model = genai_legacy.GenerativeModel(
+                    model_name='gemini-1.5-flash',
+                    system_instruction=system_prompt
+                )
+                response = model.generate_content(input_text)
+                return response.text
         except Exception as e:
-            # หากเจอข้อผิดพลาด 503 หรือเซิร์ฟเวอร์ไม่ว่าง ให้หยุดรอแล้วลองใหม่
-            if ("503" in str(e) or "unavailable" in str(e).lower()) and i < max_retries - 1:
+            err_msg = str(e).lower()
+            if ("503" in err_msg or "unavailable" in err_msg or "overloaded" in err_msg) and i < max_retries - 1:
                 time.sleep(2 * (i + 1))
                 continue
             raise e
 
 # ==============================================================================
-# 2. การตั้งค่าหน้าเว็บและดีไซน์ (กล่องสนับสนุนกะทัดรัด 600px เจนโนว่าสไตล์)
+# 2. การตั้งค่าหน้าเว็บและดีไซน์หรูหรา (กล่องสนับสนุนขนาด 600px ตามสั่ง)
 # ==============================================================================
 st.set_page_config(
     page_title="AI.prapali", 
@@ -60,7 +81,7 @@ footer { visibility: hidden !important; }
 }
 .royal-body { color: #e0e0e0; font-size: 14px; line-height: 1.6; }
 
-/* 🎯 ควบคุมขนาดกล่องสนับสนุนให้สวยงามคงที่ที่ 600px */
+/* 🎯 ล็อคขนาดกล่องสนับสนุนไว้ที่ 600px มินิมอล กระชับ ไม่ดันจอ */
 .support-card {
     background-color: #1a1a1a; border: 1px solid #2d2d2d; border-top: 3px solid #c5a85c;
     padding: 20px; border-radius: 12px; text-align: center; max-width: 600px; margin: 30px auto 10px auto;
@@ -75,7 +96,7 @@ footer { visibility: hidden !important; }
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 3. เริ่มระบบความจำบทสนทนาและการแสดงผล
+# 3. เริ่มระบบบันทึกความจำประวัติการคุย
 # ==============================================================================
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -99,7 +120,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # ==============================================================================
-# 4. ส่วนรับข้อมูลเข้าและการประมวลผลธรรมะ
+# 4. กลไกรับคำสั่งและประมวลผลข้อมูลลึกซึ้ง
 # ==============================================================================
 if user_input := st.chat_input("พิมพ์คำศัพท์หรือข้อธรรมที่ต้องการสืบค้น..."):
     with st.chat_message("user"):
@@ -108,18 +129,18 @@ if user_input := st.chat_input("พิมพ์คำศัพท์หรือ
     
     with st.chat_message("assistant"):
         if API_KEY:
-            with st.spinner("ระบบกำลังสืบค้นฐานข้อมูลพระไตรปิฎก..."):
+            with st.spinner("ระบบกำลังสืบค้นสัญญานฐานข้อมูลพระไตรปิฎก..."):
                 try:
-                    full_response = generate_with_retry_legacy(user_input)
+                    full_response = generate_with_retry_hybrid(user_input)
                     st.markdown(full_response)
                     st.session_state.messages.append({"role": "assistant", "content": full_response})
                 except Exception as e:
-                    st.error(f"⚠️ เซิร์ฟเวอร์ปลายทางหนาแน่นชั่วคราว: กรุณารอสักครู่แล้วลองใหม่อีกครั้งครับ ({e})")
+                    st.error(f"⚠️ ปลายทางหนาแน่นชั่วคราว ระบบกำลังพยายามกู้คืนคำตอบ กรุณาลองใหม่อีกครั้งใน 10 วินาที ({e})")
         else:
-            st.error("⚠️ ไม่พบรหัสสัญญานคีย์ความลับ (API Key) ในระบบ")
+            st.error("⚠️ ไม่พบรหัสสัญญาณคีย์ความลับ (API Key) ในหน้าตั้งค่าระบบ")
 
 # ==============================================================================
-# 5. ส่วนสนับสนุนระบบ (ดึงฟังก์ชันคลิกเปิด-ปิดเลขบัญชี และลิงก์ติดต่อกลับมาครบถ้วน)
+# 5. ส่วนสนับสนุนโครงสร้าง (ขนาด 600px เมนูซ่อน/แสดงเลขบัญชีและช่องทางติดต่อครบถ้วน)
 # ==============================================================================
 st.markdown("""
 <div class="support-card">
