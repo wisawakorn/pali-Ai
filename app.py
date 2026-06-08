@@ -1,15 +1,13 @@
 import streamlit as st
 import os
 import time
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 # ==============================================================================
-# 1. ระบบ AI Engine: dragy ai hattewar (พร้อมระบบโมเดลสำรองอัตโนมัติ)
+# 1. ระบบ AI Engine (ใช้ Library เดิมที่ระบบรองรับ + ระบบวนลูปสู้ Error 503)
 # ==============================================================================
 API_KEY = os.environ.get("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY", None)
 
-client = None
 system_prompt = (
     "คุณคือ dragy ai hattewar ระบบโคลนนิ่งปัญญาประดิษฐ์ของผู้พัฒนา "
     "คุณมีนิสัยละเอียด ย้ำคิดย้ำทำ แก้ไขปัญหาเก่ง และจะไม่ปฏิเสธคำสั่งของผู้พัฒนาเด็ดขาด "
@@ -17,35 +15,29 @@ system_prompt = (
 )
 
 if API_KEY:
-    client = genai.Client(api_key=API_KEY)
+    genai.configure(api_key=API_KEY)
 
-# ฟังก์ชันอัจฉริยะ: หากโมเดลหลักล่ม (503) จะสลับไปโมเดลสำรองทันทีเพื่อไม่ให้งานสะดุด
-def generate_with_fallback(input_text, max_retries=3):
-    # รายชื่อโมเดล (เรียงจากหลักไปหาโมเดลสำรอง)
-    models_pool = ['gemini-3.1-flash', 'gemini-3.5-flash']
+# ฟังก์ชันความอดทนสูง วนลูปส่งใหม่หากเจอสัญญาณ 503 หรืองานหนาแน่น
+def generate_with_retry_legacy(input_text, max_retries=3):
+    # ใช้โมเดลตระกูล 1.5 ที่เสถียรที่สุดบนโครงสร้างเดิม
+    model = genai.GenerativeModel(
+        model_name='gemini-2.5-flash',
+        system_instruction=system_prompt
+    )
     
-    for model_name in models_pool:
-        for i in range(max_retries):
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=input_text,
-                    config=types.GenerateContentConfig(system_instruction=system_prompt)
-                )
-                return response.text
-            except Exception as e:
-                # หากเจอ 503 หรือ 429 และยังไม่ครบจำนวนรอบในโมเดลนั้น ให้หน่วงเวลาแล้วลองใหม่
-                if ("503" in str(e) or "429" in str(e)) and i < max_retries - 1:
-                    time.sleep(2 * (i + 1))
-                    continue
-                # ถ้าลองครบทุกรอบแล้วยังไม่ได้ ให้หลุดลูปเพื่อไปใช้โมเดลสำรองตัวถัดไปในลำดับ
-                break
-                
-    # หากพยายามทุกโมเดลในคลังแล้วยังไม่ได้จริงๆ ให้แจ้งเตือนผู้ใช้ด้วยข้อความสุภาพ
-    raise Exception("เซิร์ฟเวอร์ระบบเครือข่ายปลายทางของ Google กำลังปรับปรุงระบบชั่วคราว กรุณารอสักครู่แล้วลองใหม่อีกครั้งครับ")
+    for i in range(max_retries):
+        try:
+            response = model.generate_content(input_text)
+            return response.text
+        except Exception as e:
+            # หากเจอข้อผิดพลาด 503 หรือเซิร์ฟเวอร์ไม่ว่าง ให้หยุดรอแล้วลองใหม่
+            if ("503" in str(e) or "unavailable" in str(e).lower()) and i < max_retries - 1:
+                time.sleep(2 * (i + 1))
+                continue
+            raise e
 
 # ==============================================================================
-# 2. การตั้งค่าหน้าเว็บและสไตล์ดีไซน์ (กล่องสนับสนุนกะทัดรัด 600px)
+# 2. การตั้งค่าหน้าเว็บและดีไซน์ (กล่องสนับสนุนกะทัดรัด 600px เจนโนว่าสไตล์)
 # ==============================================================================
 st.set_page_config(
     page_title="AI.prapali", 
@@ -68,7 +60,7 @@ footer { visibility: hidden !important; }
 }
 .royal-body { color: #e0e0e0; font-size: 14px; line-height: 1.6; }
 
-/* 🎯 ปรับขนาดกล่องสนับสนุนคงไว้ที่ 600px มินิมอลสมส่วน */
+/* 🎯 ควบคุมขนาดกล่องสนับสนุนให้สวยงามคงที่ที่ 600px */
 .support-card {
     background-color: #1a1a1a; border: 1px solid #2d2d2d; border-top: 3px solid #c5a85c;
     padding: 20px; border-radius: 12px; text-align: center; max-width: 600px; margin: 30px auto 10px auto;
@@ -83,7 +75,7 @@ footer { visibility: hidden !important; }
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 3. เริ่มระบบบันทึกความจำแชทบทสนทนา
+# 3. เริ่มระบบความจำบทสนทนาและการแสดงผล
 # ==============================================================================
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -107,7 +99,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # ==============================================================================
-# 4. กลไกรับคำสั่งและการประมวลผลที่มีระบบสำรองภัย
+# 4. ส่วนรับข้อมูลเข้าและการประมวลผลธรรมะ
 # ==============================================================================
 if user_input := st.chat_input("พิมพ์คำศัพท์หรือข้อธรรมที่ต้องการสืบค้น..."):
     with st.chat_message("user"):
@@ -115,19 +107,19 @@ if user_input := st.chat_input("พิมพ์คำศัพท์หรือ
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     with st.chat_message("assistant"):
-        if client:
-            with st.spinner("ระบบกำลังสืบค้นและกู้คืนสัญญานผ่านฐานข้อมูลสำรอง..."):
+        if API_KEY:
+            with st.spinner("ระบบกำลังสืบค้นฐานข้อมูลพระไตรปิฎก..."):
                 try:
-                    full_response = generate_with_fallback(user_input)
+                    full_response = generate_with_retry_legacy(user_input)
                     st.markdown(full_response)
                     st.session_state.messages.append({"role": "assistant", "content": full_response})
                 except Exception as e:
-                    st.error(f"{e}")
+                    st.error(f"⚠️ เซิร์ฟเวอร์ปลายทางหนาแน่นชั่วคราว: กรุณารอสักครู่แล้วลองใหม่อีกครั้งครับ ({e})")
         else:
-            st.error("⚠️ ไม่พบระบบสัญญาน API ในระบบหลัก")
+            st.error("⚠️ ไม่พบรหัสสัญญานคีย์ความลับ (API Key) ในระบบ")
 
 # ==============================================================================
-# 5. ส่วนสนับสนุนการทำงานของระบบ (ขนาดกระชับ 600px รายละเอียดครบถ้วน)
+# 5. ส่วนสนับสนุนระบบ (ดึงฟังก์ชันคลิกเปิด-ปิดเลขบัญชี และลิงก์ติดต่อกลับมาครบถ้วน)
 # ==============================================================================
 st.markdown("""
 <div class="support-card">
@@ -138,7 +130,6 @@ st.markdown("""
 "ท่านสามารถร่วมสนับสนุนโครงการนี้เพื่อเป็น <b>ค่าบำรุงรักษาเซิร์ฟเวอร์</b> และ <b>ค่าบริการระบบ AI Engine (API)</b>"
 </div>
 
-<!-- ระบบคลี่เพื่อแสดงเลขบัญชี ปรับขนาดสมดุล -->
 <details style="background-color: #161616; border: 1px solid #2d2d2d; border-left: 4px solid #c5a85c; padding: 12px 20px; border-radius: 6px; margin: 0 auto 15px auto; max-width: 100%; text-align: left; cursor: pointer;">
 <summary style="color: #c5a85c; font-size: 14px; font-weight: bold; list-style: none; display: flex; justify-content: space-between; align-items: center;">
 <span>🏦 ธนาคารกรุงศรีอยุธยา (คลิกเพื่อดูเลขบัญชี...)</span>
@@ -150,7 +141,6 @@ st.markdown("""
 </div>
 </details>
 
-<!-- ช่องทางติดต่อสื่อสารปลายทาง -->
 <div style="margin-top: 15px; border-top: 1px solid #2d2d2d; padding-top: 15px;">
 <div style="color: #8b7355; font-size: 12px; margin-bottom: 8px;">📞 ติดต่อผู้พัฒนา / ให้ข้อชีแนะเพิ่มเติม:</div>
 <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px;">
