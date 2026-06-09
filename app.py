@@ -98,8 +98,11 @@ if user_input := st.chat_input("พิมพ์ข้อความเพื่
 # ==============================================================================
 # 3. กล่องสนับสนุนและข้อมูลลิขสิทธิ์ความกว้าง 600px สมส่วน (แก้ไขจุดบั๊กสวิตช์ HTML เรียบร้อย)
 # ==============================================================================
+# ==============================================================================
+# 3. ส่วนท้าย: กล่องสนับสนุนและข้อมูลติดต่อ (แก้ไขให้แสดงผลถูกต้อง)
+# ==============================================================================
 st.markdown("""
-<div class="support-card">
+<div class="support-card" style="background-color: #1a1a1a; border: 1px solid #2d2d2d; border-top: 3px solid #c5a85c; padding: 20px; border-radius: 12px; text-align: center; max-width: 600px; margin: 30px auto 10px auto;">
     <div style="color: #c5a85c; font-size: 16px; font-weight: bold; margin-bottom: 8px;">☸️ สนับสนุนระบบปัญญาประดิษฐ์พระบาลี</div>
     <div style="color: #aaaaaa; font-size: 13px; margin-bottom: 15px; line-height: 1.6;">
         "ท่านสามารถร่วมสนับสนุนโครงการนี้เพื่อเป็นค่าบำรุงรักษาเซิร์ฟเวอร์ และค่าบริการระบบ AI Engine (API)"
@@ -116,15 +119,13 @@ st.markdown("""
     <div style="margin-top: 15px; border-top: 1px solid #2d2d2d; padding-top: 15px; margin-bottom: 15px;">
         <div style="color: #8b7355; font-size: 12px; margin-bottom: 8px;">📞 ติดต่อผู้พัฒนา / ให้ข้อชี้แนะเพิ่มเติม:</div>
         <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
-            <a class="footer-link" href="tel:0644518043">📱 โทร: 064-4518043</a>
-            <a class="footer-link" href="https://www.facebook.com/emey.za196/" target="_blank">🔵 Facebook</a>
-            <a class="footer-link" href="mailto:wissawakorn444@gmail.com">✉️ อีเมล</a>
+            <a href="tel:0644518043" style="color: #c5a85c; text-decoration: none; font-size: 13px; font-weight: bold;">📱 โทร: 064-4518043</a>
+            <a href="https://www.facebook.com/emey.za196/" target="_blank" style="color: #c5a85c; text-decoration: none; font-size: 13px; font-weight: bold;">🔵 Facebook</a>
         </div>
     </div>
     
-    <div style="border-top: 1px solid #2d2d2d; padding-top: 15px; color: #555; font-size: 11px; line-height: 1.6; text-align: center;">
-        <b style="color: #c5a85c;">© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน</b><br>
-        เจตจำนง: พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี เพื่อรักษาพุทธพจน์ให้สืบทอดต่อไปอย่างถูกต้อง
+    <div style="border-top: 1px solid #2d2d2d; padding-top: 15px; color: #555; font-size: 11px; text-align: center;">
+        <b style="color: #c5a85c;">© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน</b>
     </div>
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True) # <-- ตรวจสอบจุดนี้ให้มีคำว่า unsafe_allow_html=True เสมอครับ
