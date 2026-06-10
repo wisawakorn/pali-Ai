@@ -26,51 +26,53 @@ if LIB_STATUS and GEMINI_KEY:
     genai.configure(api_key=GEMINI_KEY)
 
 def generate_expert_engine(input_text):
-    """ระบบเชื่อมต่อประมวลผลอัจฉริยะ ต้านทาน Error 503 ฉุกเฉิน"""
-    # ช่องทางที่ 1: Google Gemini (ระบบหลัก)
+    """ระบบเชื่อมต่อประมวลผลอัจฉริยะ (OpenRouter หลัก -> Gemini สำรอง)"""
+    
+    # 🟢 ช่องทางที่ 1: สลับมาให้ OpenRouter เป็นระบบหลัก
+    if OPENROUTER_KEY:
+        try:
+            response = requests.post(
+                url="https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_KEY}", 
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "meta-llama/llama-3-8b-instruct:free", 
+                    "messages": [
+                        {"role": "system", "content": system_prompt}, 
+                        {"role": "user", "content": input_text}
+                    ]
+                },
+                timeout=15  # กำหนด timeout ให้กระชับ เผื่อสลับไปหาบอทสำรองได้ไวขึ้น
+            )
+            res_json = response.json()
+            if 'choices' in res_json and len(res_json['choices']) > 0:
+                return res_json['choices'][0]['message']['content'], "🟢 ระบบหลัก Prapali-Engine (OpenRouter)"
+            else:
+                raise Exception("OpenRouter Response Error")
+        except Exception:
+            pass  # ถ้าเกิด Error ให้ปล่อยไหลข้ามไปทำงานในบล็อก Gemini สำรองด้านล่าง
+            
+    # 🟡 ช่องทางที่ 2: Google Gemini รับหน้าที่เป็น "ระบบสำรอง" ประคองแอปยามฉุกเฉิน
     try:
         if not LIB_STATUS or not GEMINI_KEY: 
-            raise Exception("Library หรือ API Key ของ Gemini ไม่พร้อมใช้งาน")
+            raise Exception("คีย์สำรองหรือ Library ของ Gemini ไม่พร้อมใช้งาน")
         
-        # แก้ไขชื่อโมเดลเป็นเดโมที่ถูกต้อง (แนะนำ gemini-1.5-flash สำหรับความเร็วและเสถียร)
+        # ใช้โมเดล gemini-2.0-flash ล่าสุดรองรับ System Instruction แม่นยำ
         model = genai.GenerativeModel(
-            model_name='gemini-3.5-flash',
-            generation_config={"response_mime_type": "text/plain"}
+            model_name='gemini-2.0-flash',
+            system_instruction=system_prompt
         )
         
-        # ส่ง System Instruction ร่วมกับ Prompt เพื่อความถูกต้องตามคู่มือการใช้งานล่าสุด
-        full_prompt = f"System Instruction: {system_prompt}\n\nUser Question: {input_text}"
-        response = model.generate_content(full_prompt)
-        
+        response = model.generate_content(input_text)
         if response.text:
-            return response.text, "🟢 ระบบหลัก Prapali-Engine"
+            return response.text, "🟡 ระบบสำรอง Prapali-Backup (Gemini 2.0)"
         else:
-            raise Exception("Empty response")
+            raise Exception("Gemini Empty response")
             
-    except Exception as e:
-        # ช่องทางที่ 2: สลับไป OpenRouter สำรองทันทีเมื่อเซิร์ฟเวอร์หลักหนาแน่น
-        if OPENROUTER_KEY:
-            try:
-                response = requests.post(
-                    url="https://openrouter.ai/api/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {OPENROUTER_KEY}", 
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": "meta-llama/llama-3-8b-instruct:free", 
-                        "messages": [
-                            {"role": "system", "content": system_prompt}, 
-                            {"role": "user", "content": input_text}
-                        ]
-                    },
-                    timeout=20
-                )
-                return response.json()['choices'][0]['message']['content'], "🟡 ระบบสำรอง Prapali-Backup"
-            except:
-                return "เซิร์ฟเวอร์ระบบหลักและระบบสำรองกำลังปรับปรุงชั่วคราว กรุณาเว้นระยะสักครู่แล้วลองใหม่อีกครั้งครับ", "🔴 ระบบขัดข้อง"
-        else:
-            return f"เซิร์ฟเวอร์หลักหนาแน่นชั่วคราว และไม่พบคีย์ระบบสำรองในฐานข้อมูล (Error: {str(e)})", "🔴 ระบบขัดข้อง"
+    except Exception:
+        return "เซิร์ฟเวอร์ระบบหลักและระบบสำรองกำลังปรับปรุงชั่วคราว กรุณาเว้นระยะสักครู่แล้วลองใหม่อีกครั้งครับ", "🔴 ระบบขัดข้อง"
 
 # ==============================================================================
 # 2. ส่วนแสดงผล (UI) ดีไซน์โทนดาร์ก-ทอง เรียบหรู ไม่ใช้ HTML ดิบป้องกันการระเบิด
