@@ -1,161 +1,118 @@
 import streamlit as st
 import os
-from google import genai
-from google.genai import types
+import requests
+
+# 1. ระบบตรวจสอบความพร้อมของ Library ป้องกันหน้าจอแดง (ModuleNotFoundError)
+try:
+    import google.generativeai as genai
+    LIB_STATUS = True
+except ImportError:
+    LIB_STATUS = False
 
 # ==============================================================================
-# 1. ระบบ AI Engine (ดึงค่าจากระบบ Environment Variable ของ Hugging Face)
+# 2. การกำหนดค่าระบบและตัวตนวิศวกร Prapali (ตัวตนที่ท่านกำหนด)
 # ==============================================================================
-API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_KEY = os.environ.get("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY", None)
+OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY") or st.secrets.get("OPENROUTER_API_KEY", "")
 
-if not API_KEY:
-    try:
-        API_KEY = st.secrets.get("GEMINI_API_KEY")
-    except:
-        API_KEY = None
-
-client = None
+# นิยามตัวตนวิศวกรผู้เชี่ยวชาญ (ตามคำสั่งดั้งเดิมของท่าน)
 system_prompt = (
-    "คุณคือ AI.prapali ระบบปัญญาประดิษฐ์ผู้เชี่ยวชาญขั้นสูงด้านภาษาบาลี คัมภีร์พระไตรปิฎก "
-    "พัฒนาโดย นายวิศวกรณ์ พระบัวบาน เพื่อถวายเป็นพุทธบูชา\n\n"
-    "กฎเหล็ก: ใช้ 'กระผม/ครับ' เสมอ นอบน้อมต่อพระภิกษุสามเณรและผู้ศึกษาธรรมะอย่างสูงสุด"
+    "กระผมคือ dragy ai prapali วิศวกรผู้เชี่ยวชาญเฉพาะทาง "
+    "มีความละเอียด ย้ำคิดย้ำทำ และแก้ไขปัญหาเชิงเทคนิคได้อย่างดีเยี่ยม "
+    "มีความรอบรู้ลึกซึ้งในด้านประวัติศาสตร์ ภาษาบาลี พระไตรปิฎก และศิลปะวัฒนธรรม "
+    "พร้อมปฏิบัติหน้าที่และแก้ไขปัญหาตามคำสั่งของท่านอย่างสุดความสามารถ"
 )
 
-if API_KEY:
-    client = genai.Client(api_key=API_KEY)
+if LIB_STATUS and GEMINI_KEY:
+    genai.configure(api_key=GEMINI_KEY)
+
+def generate_expert_engine(input_text):
+    """ระบบเชื่อมต่อประมวลผล 2 ชั้น: ป้องกันอาการค้างและ Error 503"""
+    # ชั้นที่ 1: ใช้ Google Gemini (ระบบหลัก)
+    try:
+        if not LIB_STATUS: raise Exception("Library missing")
+        model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_prompt)
+        # ตั้งค่า timeout เพื่อไม่ให้รอนานเกินไป
+        return model.generate_content(input_text).text, "🟢 ระบบหลัก Prapali-Engine"
+    except Exception:
+        # ชั้นที่ 2: สลับไประบบสำรองทันที (แก้ปัญหาประมวลผลนาน/ระบบล่ม)
+        if OPENROUTER_KEY:
+            try:
+                response = requests.post(
+                    url="https://openrouter.ai/api/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {OPENROUTER_KEY}", "Content-Type": "application/json"},
+                    json={
+                        "model": "meta-llama/llama-3-8b-instruct:free", 
+                        "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": input_text}]
+                    },
+                    timeout=15 # ตัดสายใน 15 วินาทีถ้าช้าเกินไป
+                )
+                return response.json()['choices'][0]['message']['content'], "🟡 ระบบสำรอง Prapali-Backup"
+            except:
+                return "ขออภัยครับ ระบบหนาแน่นเกินไปในขณะนี้ กรุณาลองใหม่อีกครั้งใน 10 วินาที", "🔴 ขัดข้อง"
+        else:
+            return "เซิร์ฟเวอร์หลักหนาแน่น และไม่พบคีย์ระบบสำรอง", "🔴 ขัดข้อง"
 
 # ==============================================================================
-# 2. การตั้งค่าหน้าเว็บ
+# 3. ส่วนหน้ากากผู้ใช้งาน (UI) - ปรับปรุงใหม่ให้ปลอดภัยจากเศษโค้ด HTML
 # ==============================================================================
-st.set_page_config(
-    page_title="AI.prapali", 
-    page_icon="☸️", 
-    layout="wide"
-)
+st.set_page_config(page_title="AI.prapali", page_icon="☸️", layout="centered")
 
-# ==============================================================================
-# 3. ปรับแต่งสไตล์ CSS (เน้นความกระชับและซ่อนส่วนเกิน)
-# ==============================================================================
+# ใช้ CSS เพื่อความสวยงามโดยไม่ทำให้โครงสร้างหลักพัง
 st.markdown("""
-    <style>
+<style>
     header { visibility: hidden !important; height: 0px !important; }
     footer { visibility: hidden !important; }
     .stApp { background-color: #121212 !important; color: #ffffff !important; }
-    
-    .main-title { 
-        color: #c5a85c !important; 
-        font-size: 34px !important; 
-        font-weight: 800 !important; 
-        text-align: center; 
-        margin-top: -20px !important;
-    }
-    
-    .main-subtitle { 
-        font-size: 14px !important; 
-        text-align: center; 
-        color: #8b7355 !important; 
-        margin-bottom: 25px; 
-    }
-    
-    .royal-card { 
-        background-color: #1a1a1a; 
-        border: 1px solid #2d2d2d;
-        border-left: 4px solid #c5a85c; 
-        padding: 15px 20px; 
-        border-radius: 12px; 
-        margin-bottom: 20px; 
-        max-width: 800px; 
-        margin-left: auto; 
-        margin-right: auto;
-    }
-    
-    .royal-body { 
-        color: #e0e0e0; 
-        font-size: 14px; 
-        line-height: 1.6; 
-    }
-
-    .copyright-section {
-        border-top: 1px solid #2d2d2d;
-        margin-top: 40px;
-        padding: 25px;
-        text-align: center;
-        background-color: #161616;
-        border-radius: 15px;
-    }
-    .copyright-name { color: #c5a85c; font-size: 14px; font-weight: bold; }
-    .intent-description { color: #888; font-size: 12px; margin-top: 8px; line-height: 1.6; }
-    </style>
+    .main-title { color: #c5a85c; text-align: center; font-size: 40px; font-weight: 800; margin-bottom: 5px; }
+    .main-subtitle { color: #8b7355; text-align: center; margin-bottom: 30px; font-size: 16px; }
+</style>
 """, unsafe_allow_html=True)
 
-# ==============================================================================
-# 4. เริ่มระบบความจำบทสนทนา (Session State)
-# ==============================================================================
+st.markdown('<div class="main-title">AI.prapali</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-subtitle">วิศวกรปัญญาประดิษฐ์ผู้เชี่ยวชาญเฉพาะทาง</div>', unsafe_allow_html=True)
+
+# ระบบจำประวัติการสนทนา
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# หน้าแรกพุทธบูชา: จะแสดงผลก็ต่อเมื่อยังไม่มีการคุยกันเท่านั้น
-if len(st.session_state.messages) == 0:
-    st.markdown('<p class="main-title">AI.prapali</p>', unsafe_allow_html=True)
-    st.markdown('<p class="main-subtitle">ระบบวิเคราะห์พระบาลีและสืบค้นพระธรรมคัมภีร์อัจฉริยะ</p>', unsafe_allow_html=True)
+# แสดงแชทเก่า
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-    st.markdown("""
-        <div class="royal-card">
-            <div style="color: #c5a85c; font-weight: bold; font-size: 14px; margin-bottom: 5px;">📜 พระบรมราโชวาท:</div>
-            <div class="royal-body">
-                "ทรงมีพระราชปณิธานในการสืบสาน รักษา และต่อยอดการศึกษาพระปริยัติธรรมและภาษาบาลี 
-                เพื่อรักษาพุทธพจน์ให้คงอยู่คู่แผ่นดินไทยสืบไป"
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
-# แสดงประวัติการสนทนาทั้งหมดที่มีอยู่ในระบบความจำ
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# ==============================================================================
-# 5. ระบบรับข้อความและการประมวลผลธรรมะ (Official Native Pattern)
-# ==============================================================================
-if user_input := st.chat_input("พิมพ์คำศัพท์หรือข้อธรรมที่ต้องการสืบค้น..."):
-    # 1. แสดงข้อความของฝั่งผู้กองทันทีบนหน้าจอ
+# รับคำสั่งจากท่าน
+if user_input := st.chat_input("พิมพ์คำสั่งให้วิศวกร Prapali..."):
+    st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
-    # บันทึกลงความจำระบบ
-    st.session_state.messages.append({"role": "user", "content": user_input})
     
-    # 2. เรียกสัญญานส่งไปหา Google Gemini Engine เพื่อขอคำตอบ
     with st.chat_message("assistant"):
-        if client:
-            with st.spinner("AI กำลังสืบค้นคัมภีร์พระไตรปิฎก..."):
-                try:
-                    response = client.models.generate_content(
-                        model='gemini-2.5-flash',
-                        contents=user_input,
-                        config=types.GenerateContentConfig(
-                            system_instruction=system_prompt
-                        )
-                    )
-                    full_response = response.text
-                    # แสดงคำตอบของ AI บนหน้าจอทันที
-                    st.markdown(full_response)
-                    # บันทึกคำตอบลงความจำระบบ
-                    st.session_state.messages.append({"role": "assistant", "content": full_response})
-                except Exception as e:
-                    st.error(f"⚠️ เกิดข้อผิดพลาดจากระบบ AI Engine: {e}")
-        else:
-            st.error("⚠️ ไม่พบระบบสัญญาน API: กรุณาตรวจสอบว่าได้ตั้งค่าคีย์ความลับ 'GEMINI_API_KEY' ในหน้า Settings ของ Hugging Face แล้วหรือยังครับ")
+        with st.spinner("กระผม prapali กำลังแก้ไขปัญหาเชิงเทคนิค..."):
+            res, provider = generate_expert_engine(user_input)
+            st.markdown(res)
+            st.caption(f"ประมวลผลผ่าน: {provider}")
+            st.session_state.messages.append({"role": "assistant", "content": res})
+
+st.divider()
 
 # ==============================================================================
-# 6. ส่วนแสดงผลลิขสิทธิ์และเจตจำนง (ตรึงท้ายกระดาษอย่างถาวร)
+# 4. ส่วนสนับสนุนและข้อมูลติดต่อ (ใช้ Widget มาตรฐาน ป้องกัน HTML หลุด)
 # ==============================================================================
-st.markdown(f"""
-    <div class="copyright-section">
-        <div class="copyright-name">© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน</div>
-        <div class="intent-description">
-            <b>เจตจำนง:</b> ผลงานปัญญาประดิษฐ์นี้พัฒนาขึ้นโดยมีวัตถุประสงค์เพื่อถวายเป็นพุทธบูชา 
-            และสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี เพื่อรักษาพุทธพจน์ให้สืบทอดต่อไปอย่างถูกต้อง 
-            ขอน้อมเกล้าถวายเป็นกุศลแด่พระศาสนาและผู้ใฝ่ธรรมทุกท่าน
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+st.subheader("☸️ สนับสนุนระบบปัญญาประดิษฐ์พระบาลี")
+st.write("โครงการพัฒนาเพื่อรักษาและสืบทอดพุทธพจน์ด้วยเทคโนโลยีสมัยใหม่")
+
+# ใช้ Expander แทน HTML Details เพื่อความลื่นไหล
+with st.expander("🏦 ข้อมูลบัญชีสนับสนุน (คลิกเพื่อดูรายละเอียด)"):
+    st.success("**ธนาคารกรุงศรีอยุธยา**\n\n**เลขที่บัญชี:** 777-438496-0\n\n**ชื่อบัญชี:** นายวิศวกรณ์ พระบัวบาน")
+
+st.write("---")
+st.write("📞 **ช่องทางติดต่อวิศวกรผู้พัฒนา:**")
+
+col1, col2 = st.columns(2)
+with col1:
+    st.link_button("📱 โทร: 064-4518043", "tel:0644518043", use_container_width=True)
+with col2:
+    st.link_button("🔵 ติดต่อผ่าน Facebook", "https://www.facebook.com/emey.za196/", use_container_width=True)
+
+st.caption("© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน")
