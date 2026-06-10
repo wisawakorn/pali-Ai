@@ -25,7 +25,7 @@ st.subheader("ผู้เชี่ยวชาญปัญญาประดิ
 st.write("---")
 
 # 🔑 ใส่ API Key ของคุณตรงนี้ได้เลย (คนใช้งานจะไม่เห็นช่องกรอกแล้ว)
-GEMINI_API_KEY = "วาง_API_Key_ของคุณตรงนี้" 
+GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 
 SYSTEM_PROMPT = (
     "คุณคือ 'ai-prapali' นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา "
