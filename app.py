@@ -30,7 +30,7 @@ def generate_expert_engine(input_text):
     # ช่องทางที่ 1: Google Gemini (ระบบหลัก)
     try:
         if not LIB_STATUS: raise Exception("Library missing")
-        model = genai.GenerativeModel(model_name='gemini-3.1-flashlite', system_instruction=system_prompt)
+        model = genai.GenerativeModel(model_name='gemini-3.1-flash', system_instruction=system_prompt)
         return model.generate_content(input_text).text, "🟢 ระบบหลัก Prapali-Engine"
     except Exception:
         # ช่องทางที่ 2: สลับไป OpenRouter สำรองทันทีเมื่อเซิร์ฟเวอร์หลักหนาแน่น
