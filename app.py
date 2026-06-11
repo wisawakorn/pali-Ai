@@ -12,7 +12,7 @@ with st.sidebar:
     st.markdown("🤝 **ติดต่อร่วมสนับสนุน**")
     st.markdown("""
     * 📧 **Email:** wissawakorn444@gmail.com
-    * 📞 **โทร:** 0644518043
+    * 📞 **โทร:pomplay.** 0644518043
     * 🌐 **Facebook:** [emey.za196](https://www.facebook.com/emey.za196/)
     """)
 
