@@ -20,8 +20,8 @@ with st.sidebar:
     # ส่วนข้อมูลติดต่อและสนับสนุน
     st.markdown("🤝 **ติดต่อร่วมสนับสนุน**")
     st.markdown("""
-    * 📧 **Email:** wissawakorn444@gmail.com
-    * 📞 **โทร:** 0644518043
+    * 📧 **เว็บaiพระบาลี:** https://dev-ai-prapali.pantheonsite.io
+    * 📞 **เบอร์โทรพอมเพลย์:** 0644518043
     * 🌐 **Facebook:** [emey.za196](https://www.facebook.com/emey.za196/)
     """)
 
@@ -45,7 +45,7 @@ SYSTEM_PROMPT = (
 # ตรวจสอบประวัติการแชท
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
-        {"role": "assistant", "content": "เจริญพร ผมคือ ai-prapali นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา มีสิ่งใดให้ร่วมสนทนาหรือให้ข้อมูลเกี่ยวกับหลักธรรมและภาษาบาลีไหมครับ?"}
+        {"role": "assistant", "content": " กระผมคือ ai-prapali นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา มีสิ่งใดให้ร่วมสนทนาหรือให้ข้อมูลเกี่ยวกับหลักธรรมและภาษาบาลีไหมครับ?"}
     ]
 
 # แสดงประวัติการคุยบนหน้าจอ
