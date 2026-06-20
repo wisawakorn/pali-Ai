@@ -54,44 +54,50 @@ for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 
-# --- สร้างแถวควบคุมด้านล่าง (กล่องแชท + ปุ่มบวกสำหรับสืบค้นด้วยภาพ) ---
-col_btn, col_chat = st.columns([1, 7], vertical_alignment="bottom")
+# --- 📌 เทคนิคทำให้กล่องแชทและปุ่มเครื่องหมายบวก ตรึงอยู่ด้านล่างสุดเสมอ ---
+# สร้าง container แยกไว้ด้านล่างสุดของสคริปต์หน้าจอ
+input_container = st.container()
 
 uploaded_file = None
 image = None
 
-with col_btn:
-    with st.popover("➕", help="คลิกเพื่ออัปโหลดหรือสืบค้นด้วยภาพ"):
-        uploaded_file = st.file_uploader(
-            "อัปโหลดรูปภาพที่ต้องการให้ AI วิเคราะห์", 
-            type=["jpg", "jpeg", "png"],
-            label_visibility="collapsed"
-        )
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file)
-            st.image(image, caption="ภาพที่เลือกไว้", use_container_width=True)
+# บังคับให้อินพุตไปเรนเดอร์ใน container ล่างสุด
+with input_container:
+    col_btn, col_chat = st.columns([1, 7], vertical_alignment="bottom")
 
-with col_chat:
-    prompt = st.chat_input("พิมพ์ข้อความคำถามธรรมะหรือบาลีที่นี่...")
+    with col_btn:
+        with st.popover("➕", help="คลิกเพื่ออัปโหลดหรือสืบค้นด้วยภาพ"):
+            uploaded_file = st.file_uploader(
+                "อัปโหลดรูปภาพที่ต้องการให้ AI วิเคราะห์", 
+                type=["jpg", "jpeg", "png"],
+                label_visibility="collapsed"
+            )
+            if uploaded_file is not None:
+                image = Image.open(uploaded_file)
+                st.image(image, caption="ภาพที่เลือกไว้", use_container_width=True)
+
+    with col_chat:
+        prompt = st.chat_input("พิมพ์ข้อความคำถามธรรมะหรือบาลีที่นี่...")
 
 
 # --- ส่วนประมวลผลการทำงานเมื่อกดส่งคำถาม ---
 if prompt:
+    # 1. แสดงคำถามฝั่งผู้ใช้ทันที
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
     
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         
-        # มัดรวมอินพุต (รูปภาพ + ตัวหนังสือ)
+        # มัดรวมอินพุต (รูปภาพ + ข้อความคำถาม)
         content_parts = []
         if image is not None:
             content_parts.append(image)
         content_parts.append(prompt)
         
         with st.spinner("ai-prapali กำลังประมวลผลคำตอบ..."):
+            # เรียกใช้งานโมเดลโดยเปิดรับข้อมูลแบบไดนามิก ป้องกันหน้าเว็บล้มจากเวอร์ชันของไลบรารี
             try:
-                # ลองเรียกใช้งานแบบเปิดฟังก์ชันค้นหาข้อมูลล่าสุด (เสถียรที่สุดสำหรับ SDK ทั่วไป)
                 model = genai.GenerativeModel(
                     model_name="gemini-2.5-flash",
                     system_instruction=SYSTEM_PROMPT,
@@ -99,7 +105,6 @@ if prompt:
                 )
                 response = model.generate_content(content_parts)
             except Exception:
-                # แผนสำรอง: หากเวอร์ชันไลบรารีเก่าเกินไปและไม่รองรับ Search Tools ให้รันด้วยโหมดปกติเพื่อให้หน้าเว็บไม่ล้ม
                 model = genai.GenerativeModel(
                     model_name="gemini-2.5-flash",
                     system_instruction=SYSTEM_PROMPT
@@ -108,8 +113,12 @@ if prompt:
                 
             msg = response.text
         
+        # 2. แสดงคำตอบฝั่ง AI และบันทึกประวัติ
         st.session_state.messages.append({"role": "assistant", "content": msg})
         st.chat_message("assistant").write(msg)
+        
+        # ทำการ refresh หน้าจอเพื่อให้เนื้อหาแชทใหม่เลื่อนขึ้นด้านบน และดันกล่องแชทลงด้านล่างสุด
+        st.rerun()
         
     except Exception as e:
         st.error(f"เกิดข้อผิดพลาดในการเชื่อมต่อ: {e}")
@@ -117,9 +126,9 @@ if prompt:
 # --- ข้อความลิขสิทธิ์ท้ายหน้าเว็บ ---
 st.write("") 
 st.markdown(
-    "<div style='text-align: center; color: gray; font-size: 0.85rem; padding-top: 20px;'>"
+    "<div style='text-align: center; color: gray; font-size: 0.85rem; padding-top: 40px; padding-bottom: 60px;'>"
     "© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน<br>"
-    "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระองค์ภา เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
+    "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระเจ้าลูกเธอเจ้าฟ้าพัชรกิตติยาภาฯ เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
     "</div>", 
     unsafe_allow_html=True
 )
