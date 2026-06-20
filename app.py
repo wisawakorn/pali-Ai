@@ -1,5 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
+from google.generativeai.types import Tool
+from google.generativeai.types import GoogleSearch
 import os
 from PIL import Image
 
@@ -54,14 +56,12 @@ for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 
-# --- 📌 เทคนิคทำให้กล่องแชทและปุ่มเครื่องหมายบวก ตรึงอยู่ด้านล่างสุดเสมอ ---
-# สร้าง container แยกไว้ด้านล่างสุดของสคริปต์หน้าจอ
+# --- สร้างกล่องแชทและปุ่มเครื่องหมายบวกให้ตรึงอยู่ด้านล่างสุดเสมอ ---
 input_container = st.container()
 
 uploaded_file = None
 image = None
 
-# บังคับให้อินพุตไปเรนเดอร์ใน container ล่างสุด
 with input_container:
     col_btn, col_chat = st.columns([1, 7], vertical_alignment="bottom")
 
@@ -82,42 +82,36 @@ with input_container:
 
 # --- ส่วนประมวลผลการทำงานเมื่อกดส่งคำถาม ---
 if prompt:
-    # 1. แสดงคำถามฝั่งผู้ใช้ทันที
+    # 1. แสดงคำถามฝั่งผู้ใช้
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
     
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         
-        # มัดรวมอินพุต (รูปภาพ + ข้อความคำถาม)
+        # มัดรวมข้อมูลอินพุต (ภาพ + ข้อความคำถาม)
         content_parts = []
         if image is not None:
             content_parts.append(image)
         content_parts.append(prompt)
         
         with st.spinner("ai-prapali กำลังประมวลผลคำตอบ..."):
-            # เรียกใช้งานโมเดลโดยเปิดรับข้อมูลแบบไดนามิก ป้องกันหน้าเว็บล้มจากเวอร์ชันของไลบรารี
-            try:
-                model = genai.GenerativeModel(
-                    model_name="gemini-2.5-flash",
-                    system_instruction=SYSTEM_PROMPT,
-                    tools=['google_search_retrieval']
-                )
-                response = model.generate_content(content_parts)
-            except Exception:
-                model = genai.GenerativeModel(
-                    model_name="gemini-2.5-flash",
-                    system_instruction=SYSTEM_PROMPT
-                )
-                response = model.generate_content(content_parts)
-                
+            # กำหนดเครื่องมือการค้นหา Google Search ตัวล่าสุดที่สมบูรณ์และเป็นมาตรฐานสูงสุดของคลาส
+            search_tool = Tool(google_search=GoogleSearch())
+            
+            model = genai.GenerativeModel(
+                model_name="gemini-2.5-flash",
+                system_instruction=SYSTEM_PROMPT,
+                tools=[search_tool]
+            )
+            
+            response = model.generate_content(content_parts)
             msg = response.text
         
-        # 2. แสดงคำตอบฝั่ง AI และบันทึกประวัติ
+        # 2. แสดงคำตอบฝั่ง AI และทำการบันทึกประวัติ
         st.session_state.messages.append({"role": "assistant", "content": msg})
         st.chat_message("assistant").write(msg)
         
-        # ทำการ refresh หน้าจอเพื่อให้เนื้อหาแชทใหม่เลื่อนขึ้นด้านบน และดันกล่องแชทลงด้านล่างสุด
         st.rerun()
         
     except Exception as e:
@@ -128,7 +122,7 @@ st.write("")
 st.markdown(
     "<div style='text-align: center; color: gray; font-size: 0.85rem; padding-top: 40px; padding-bottom: 60px;'>"
     "© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน<br>"
-    "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระเจ้าลูกเธอเจ้าฟ้าพัชรกิตติยาภาฯ เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
+    "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระองค์ภา เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
     "</div>", 
     unsafe_allow_html=True
 )
