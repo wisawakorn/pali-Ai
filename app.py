@@ -88,7 +88,7 @@ if prompt:
         
         # 3. เรียกใช้งานโมเดลพร้อมเปิดระบบค้นหาแบบกำหนดเอง (แก้ไขข้อผิดพลาด google_search_retrieval เรียบร้อยแล้ว)
         model = genai.GenerativeModel(
-            model_name="gemini-3.5-flash",
+            model_name="gemini-2.5-flash",
             system_instruction=SYSTEM_PROMPT,
             tools=[{"google_search_retrieval": {"dynamic_retrieval_config": {"mode": "dynamic"}}}]
         )
