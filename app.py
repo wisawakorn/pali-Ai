@@ -1,7 +1,5 @@
 import streamlit as st
 import google.generativeai as genai
-from google.generativeai.types import Tool
-from google.generativeai.types import GoogleSearch
 import os
 from PIL import Image
 
@@ -10,7 +8,6 @@ st.set_page_config(page_title="ai-prapali", page_icon="🪷")
 
 # --- ส่วนของแถบด้านข้าง (Sidebar) ---
 with st.sidebar:
-    # ดึงไฟล์รูปภาพ royal_image.png มาแสดงผล
     IMAGE_FILENAME = "royal_image.png"
     
     if os.path.exists(IMAGE_FILENAME):
@@ -56,7 +53,7 @@ for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 
-# --- สร้างกล่องแชทและปุ่มเครื่องหมายบวกให้ตรึงอยู่ด้านล่างสุดเสมอ ---
+# --- 📌 จัดกล่องแชทและปุ่มเครื่องหมายบวกให้อยู่ด้านล่างสุดเสมอ ---
 input_container = st.container()
 
 uploaded_file = None
@@ -82,7 +79,6 @@ with input_container:
 
 # --- ส่วนประมวลผลการทำงานเมื่อกดส่งคำถาม ---
 if prompt:
-    # 1. แสดงคำถามฝั่งผู้ใช้
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
     
@@ -96,19 +92,34 @@ if prompt:
         content_parts.append(prompt)
         
         with st.spinner("ai-prapali กำลังประมวลผลคำตอบ..."):
-            # กำหนดเครื่องมือการค้นหา Google Search ตัวล่าสุดที่สมบูรณ์และเป็นมาตรฐานสูงสุดของคลาส
-            search_tool = Tool(google_search=GoogleSearch())
+            # ใช้ระบบสลับโหมดอัตโนมัติ (Fallback) เพื่อป้องกันโค้ดล่มจากเวอร์ชันของตัวแปลงภาษา
+            try:
+                # แผน A: ทดลองเปิดตัวค้นหาข้อมูลแบบไดนามิกตัวล่าสุด
+                model = genai.GenerativeModel(
+                    model_name="gemini-2.5-flash",
+                    system_instruction=SYSTEM_PROMPT,
+                    tools=[{"google_search": {}}]
+                )
+                response = model.generate_content(content_parts)
+            except Exception:
+                try:
+                    # แผน B: หากแผน A ไม่ผ่าน ให้ถอยมาใช้โครงสร้างแบบคลาสสิกเดิม
+                    model = genai.GenerativeModel(
+                        model_name="gemini-2.5-flash",
+                        system_instruction=SYSTEM_PROMPT,
+                        tools=['google_search_retrieval']
+                    )
+                    response = model.generate_content(content_parts)
+                except Exception:
+                    # แผน C: ปลอดภัยสุด หากระบบค้นหาพังทั้งหมด ให้รันโหมดแชทธรรมดาเพื่อไม่ให้แอปพลิเคชันค้างตัวหนังสือสีแดง
+                    model = genai.GenerativeModel(
+                        model_name="gemini-2.5-flash",
+                        system_instruction=SYSTEM_PROMPT
+                    )
+                    response = model.generate_content(content_parts)
             
-            model = genai.GenerativeModel(
-                model_name="gemini-2.5-flash",
-                system_instruction=SYSTEM_PROMPT,
-                tools=[search_tool]
-            )
-            
-            response = model.generate_content(content_parts)
             msg = response.text
         
-        # 2. แสดงคำตอบฝั่ง AI และทำการบันทึกประวัติ
         st.session_state.messages.append({"role": "assistant", "content": msg})
         st.chat_message("assistant").write(msg)
         
@@ -120,7 +131,7 @@ if prompt:
 # --- ข้อความลิขสิทธิ์ท้ายหน้าเว็บ ---
 st.write("") 
 st.markdown(
-    "<div style='text-align: center; color: gray; font-size: 0.85rem; padding-top: 40px; padding-bottom: 60px;'>"
+    "<div style='text-align: center; color: gray; font-size: 0.85rem; padding-top: 20px; padding-bottom: 60px;'>"
     "© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน<br>"
     "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระองค์ภา เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
     "</div>", 
