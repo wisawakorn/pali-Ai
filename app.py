@@ -86,11 +86,11 @@ if prompt:
         # 2. ตั้งค่าการเชื่อมต่อ Gemini API
         genai.configure(api_key=GEMINI_API_KEY)
         
-        # 3. เรียกใช้งานโมเดลพร้อมเปิดระบบค้นหาแบบกำหนดเอง (แก้ไขข้อผิดพลาด google_search_retrieval เรียบร้อยแล้ว)
+        # 3. เรียกใช้งานโมเดลพร้อมเปิดระบบค้นหาผ่าน Google Search Tool ตัวล่าสุดแบบสมบูรณ์
         model = genai.GenerativeModel(
             model_name="gemini-2.5-flash",
             system_instruction=SYSTEM_PROMPT,
-            tools=[{"google_search_retrieval": {"dynamic_retrieval_config": {"mode": "dynamic"}}}]
+            tools=[{"google_search": {}}]
         )
         
         # 4. มัดรวมข้อมูลที่จะส่งให้ AI (ตรวจสอบว่ามีภาพติดไปด้วยหรือไม่)
