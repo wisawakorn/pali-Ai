@@ -3,12 +3,12 @@ import google.generativeai as genai
 import os
 from PIL import Image
 
-# 1. ตั้งค่าหน้าเว็บ (ต้องอยู่บรรทัดแรกๆ ของระบบ Streamlit เสมอ)
+# ตั้งค่าหน้าเว็บ (ต้องอยู่ด้านบนสุดของระบบ Streamlit เสมอ)
 st.set_page_config(page_title="ai-prapali", page_icon="🪷")
 
 # --- ส่วนของแถบด้านข้าง (Sidebar) ---
 with st.sidebar:
-    # ดึงไฟล์รูปภาพ royal_image.png มาแสดงผล
+    # ดึงไฟล์รูปภาพ royal_image.png ที่อยู่ใน GitHub โฟลเดอร์เดียวกันมาแสดงผล
     IMAGE_FILENAME = "royal_image.png"
     
     if os.path.exists(IMAGE_FILENAME):
@@ -31,7 +31,7 @@ st.title("ai-prapali 🪷")
 st.subheader("ผู้เชี่ยวชาญปัญญาประดิษฐ์ทางพระพุทธศาสนา")
 st.write("---")
 
-# ดึง API Key จากระบบ Secrets
+# ดึง API Key จากระบบ Secrets เพื่อความปลอดภัยและความสะดวกของผู้ใช้งาน
 try:
     GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 except Exception:
@@ -43,26 +43,25 @@ SYSTEM_PROMPT = (
     "ด้วยความถูกต้อง สุภาพ และใช้ภาษาที่เข้าใจง่ายในเชิงวิชาการ ผู้สร้างคือ นายวิศวกรณ์ พระบัวบาน เพื่อถวายเป็นพุทธบูชา และ พระราชกุศลแด่พระองภา เพื่อการศึกษาพระธรรม "
 )
 
-# ตรวจสอบประวัติการแชทใน Session State
+# ตรวจสอบประวัติการแชท
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
-        {"role": "assistant", "content": "กระผมคือ ai-prapali นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา มีสิ่งใดให้ร่วมสนทนาหรือให้ข้อมูลเกี่ยวกับหลักธรรม ภาษาบาลี หรือต้องการให้วิเคราะห์ภาพธรรมะไหมครับ?"}
+        {"role": "assistant", "content": " กระผมคือ ai-prapali นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา มีสิ่งใดให้ร่วมสนทนาหรือให้ข้อมูลเกี่ยวกับหลักธรรมและภาษาบาลีไหมครับ?"}
     ]
 
-# แสดงประวัติการคุยทั้งหมดบนหน้าจอ
+# แสดงประวัติการคุยบนหน้าจอ
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 
-# --- สร้างแถวควบคุมด้านล่าง (กล่องแชท + ปุ่มบวกสำหรับสืบค้นด้วยภาพ) ---
-# ใช้ st.columns เพื่อดันปุ่ม ➕ ให้ไปอยู่ข้างซ้ายของกล่อง chat_input อย่างสวยงาม
+# --- ส่วนควบคุมอินพุตด้านล่าง (ปุ่มบวกสำหรับส่งภาพ + กล่องพิมพ์ข้อความแชท) ---
 col_btn, col_chat = st.columns([1, 7], vertical_alignment="bottom")
 
 uploaded_file = None
 image = None
 
 with col_btn:
-    # ปุ่ม popover เป็นเครื่องหมายบวก เมื่อกดแล้วจะมีหน้าต่างเล็กๆ ให้เลือกรูปภาพ
+    # เมนูป๊อปอัปเครื่องหมายบวก สำหรับกดเลือกและอัปโหลดภาพสืบค้น
     with st.popover("➕", help="คลิกเพื่ออัปโหลดหรือสืบค้นด้วยภาพ"):
         uploaded_file = st.file_uploader(
             "อัปโหลดรูปภาพที่ต้องการให้ AI วิเคราะห์", 
@@ -76,43 +75,41 @@ with col_btn:
 with col_chat:
     prompt = st.chat_input("พิมพ์ข้อความคำถามธรรมะหรือบาลีที่นี่...")
 
-# --- ส่วนประมวลผลการทำงานเมื่อกดส่งคำถาม ---
+
+# --- ส่วนประมวลผลการทำงานส่งข้อมูลให้ AI ---
 if prompt:
-    # 1. บันทึกและแสดงคำถามฝั่งผู้ใช้
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
     
     try:
-        # 2. ตั้งค่าการเชื่อมต่อ Gemini API
         genai.configure(api_key=GEMINI_API_KEY)
         
-        # 3. เรียกใช้งานโมเดลพร้อมเปิดระบบค้นหาผ่าน Google Search Tool ตัวล่าสุดแบบสมบูรณ์
+        # ตั้งค่าโมเดลเปิดใช้งานระบบ Google Search Tool ตัวล่าสุดให้อัปเดตข้อมูลได้ตลอดเวลา
         model = genai.GenerativeModel(
             model_name="gemini-2.5-flash",
             system_instruction=SYSTEM_PROMPT,
             tools=[{"google_search": {}}]
         )
         
-        # 4. มัดรวมข้อมูลที่จะส่งให้ AI (ตรวจสอบว่ามีภาพติดไปด้วยหรือไม่)
+        # รวบรวมข้อมูลอินพุต (ตรวจสอบว่ามีการส่งรูปภาพเข้ามาพร้อมกันหรือไม่)
         content_parts = []
         if image is not None:
-            content_parts.append(image)  # ส่งรูปภาพเข้าไป
+            content_parts.append(image)
             
-        content_parts.append(prompt)     # ส่งข้อความคำถามตัวหนังสือเข้าไป
+        content_parts.append(prompt)
         
-        # 5. สั่งประมวลผลคำตอบ
+        # เรียกใช้งานการตอบกลับจาก AI
         with st.spinner("ai-prapali กำลังประมวลผลคำตอบ..."):
             response = model.generate_content(content_parts)
             msg = response.text
         
-        # 6. บันทึกและแสดงคำตอบฝั่ง AI Assistant
         st.session_state.messages.append({"role": "assistant", "content": msg})
         st.chat_message("assistant").write(msg)
         
     except Exception as e:
         st.error(f"เกิดข้อผิดพลาดในการเชื่อมต่อ: {e}")
 
-# --- ข้อความลิขสิทธิ์ท้ายหน้าเว็บ ---
+# --- ข้อความลิขสิทธิ์ใต้กล่องพิมพ์ข้อความแชท ---
 st.write("") 
 st.markdown(
     "<div style='text-align: center; color: gray; font-size: 0.85rem; padding-top: 20px;'>"
