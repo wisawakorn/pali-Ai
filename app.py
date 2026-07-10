@@ -82,7 +82,7 @@ with st.sidebar:
             user_prompts = [m["content"] for m in temp_messages if m["role"] == "user"]
             
             if user_prompts:
-                title_text = user_prompts[0][:20] + "..." if len(user_prompts[0]) > 20 else user_prompts[0]
+                title_text = user_prompts[0][:100] + "..." if len(user_prompts[0]) > 100 else user_prompts[0]
             else:
                 title_text = "ห้องสนทนาว่างเปล่า"
                 
@@ -177,7 +177,7 @@ if prompt:
             try:
                 # แผน A
                 model = genai.GenerativeModel(
-                    model_name="gemini-3.5-flash",
+                    model_name="gemini-1.5-flash",
                     system_instruction=SYSTEM_PROMPT,
                     tools=[{"google_search": {}}]
                 )
@@ -186,7 +186,7 @@ if prompt:
                 try:
                     # แผน B
                     model = genai.GenerativeModel(
-                        model_name="gemini-3.5-flash",
+                        model_name="gemini-1.5-flash",
                         system_instruction=SYSTEM_PROMPT,
                         tools=['google_search_retrieval']
                     )
@@ -194,7 +194,7 @@ if prompt:
                 except Exception:
                     # แผน C
                     model = genai.GenerativeModel(
-                        model_name="gemini-3.5-flash",
+                        model_name="gemini-1.5-flash",
                         system_instruction=SYSTEM_PROMPT
                     )
                     response = model.generate_content(content_parts)
