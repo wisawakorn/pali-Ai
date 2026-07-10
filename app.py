@@ -1,20 +1,80 @@
 import streamlit as st
 import google.generativeai as genai
 import os
+import json
+import csv
+from datetime import datetime
 from PIL import Image
 
-# 1. ตั้งค่าหน้าเว็บ (ต้องอยู่บรรทัดแรกของระบบ Streamlit เสมอ)
-st.set_page_config(page_title="ai-prapali", page_icon="🪷")
+# 1. ตั้งค่าหน้าเว็บ (ต้องอยู่บรรทัดแรกเสมอ)
+st.set_page_config(page_title="ai-prapali", page_icon="🪷", layout="wide")
+
+# --- ฟังก์ชันจัดการประวัติการแชท (Local/Session History) ---
+CHATS_DIR = "user_chats"
+LOGS_DIR = "model_training_logs"
+os.makedirs(CHATS_DIR, exist_ok=True)
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+# ดึง Session ID ประจำเบราว์เซอร์ของผู้ใช้
+if "user_session_id" not in st.session_state:
+    import uuid
+    st.session_state["user_session_id"] = str(uuid.uuid4())
+
+session_id = st.session_state["user_session_id"]
+history_file = os.path.join(CHATS_DIR, f"chat_{session_id}.json")
+
+# โหลดประวัติเก่า (ถ้ามี)
+if "messages" not in st.session_state:
+    if os.path.exists(history_file):
+        with open(history_file, "r", encoding="utf-8") as f:
+            st.session_state["messages"] = json.load(f)
+    else:
+        st.session_state["messages"] = [
+            {"role": "assistant", "content": "กระผมคือ ai-prapali นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา มีสิ่งใดให้ร่วมสนทนาหรือให้ข้อมูลเกี่ยวกับหลักธรรม ภาษาบาลี หรือต้องการให้วิเคราะห์ภาพธรรมะไหมครับ?"}
+        ]
+
+def save_chat_history():
+    """บันทึกประวัติการคุยแยกตาม session ของผู้ใช้"""
+    with open(history_file, "w", encoding="utf-8") as f:
+        json.dump(st.session_state.messages, f, ensure_ascii=False, indent=4)
+
+def log_data_for_prapali_v1(prompt, response):
+    """บันทึกข้อมูลคำถาม-คำตอบเพื่อนำไปใช้ Train/Fine-tune พัฒนาโมเดล prapali v1"""
+    log_file = os.path.join(LOGS_DIR, "prapali_v1_dataset.csv")
+    file_exists = os.path.exists(log_file)
+    
+    with open(log_file, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["Timestamp", "Prompt", "Response"]) # Header
+        writer.writerow([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), prompt, response])
 
 # --- ส่วนของแถบด้านข้าง (Sidebar) ---
 with st.sidebar:
     IMAGE_FILENAME = "royal_image.png"
-    
     if os.path.exists(IMAGE_FILENAME):
         st.image(IMAGE_FILENAME, use_container_width=True)
     else:
         st.warning("⚠️ กรุณาอัปโหลดไฟล์รูปภาพชื่อ royal_image.png ขึ้นใน GitHub")
         
+    st.write("---")
+    
+    # 📜 แสดงประวัติการแชทของเครื่องนี้ที่ Sidebar
+    st.subheader("📜 ประวัติการสนทนาของคุณ")
+    for index, msg in enumerate(st.session_state.messages):
+        if msg["role"] == "user":
+            # ตัดคำให้สั้นลงเพื่อแสดงในแถบข้างแบบสวยงาม
+            short_text = msg["content"][:25] + "..." if len(msg["content"]) > 25 else msg["content"]
+            st.text(f"💬 {short_text}")
+            
+    if st.button("🗑️ ล้างประวัติการแชทเครื่องนี้"):
+        if os.path.exists(history_file):
+            os.remove(history_file)
+        st.session_state.messages = [
+            {"role": "assistant", "content": "กระผมคือ ai-prapali นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา มีสิ่งใดให้ร่วมสนทนาหรือให้ข้อมูลเกี่ยวกับหลักธรรม ภาษาบาลี หรือต้องการให้วิเคราะห์ภาพธรรมะไหมครับ?"}
+        ]
+        st.rerun()
+
     st.write("---")
     
     # ส่วนข้อมูลติดต่อและสนับสนุน
@@ -24,6 +84,9 @@ with st.sidebar:
     * 📞 **เบอร์โทรพอมเพลย์:** 0644518043
     * 🌐 **Facebook:** [emey.za196](https://www.facebook.com/emey.za196/)
     """)
+    
+    # ส่วนแสดงสถานะการเก็บข้อมูลพัฒนาโมเดล
+    st.info("🤖 **prapali v1 Learning Center**\nระบบกำลังบันทึกการเรียนรู้แบบนิรนามเพื่อนำไปพัฒนาโมเดล prapali v1 ให้เชี่ยวชาญยิ่งขึ้น")
 
 # --- ส่วนหลักของหน้าเว็บ (Main Content) ---
 st.title("ai-prapali 🪷")
@@ -42,20 +105,12 @@ SYSTEM_PROMPT = (
     "ด้วยความถูกต้อง สุภาพ และใช้ภาษาที่เข้าใจง่ายในเชิงวิชาการ ผู้สร้างคือ นายวิศวกรณ์ พระบัวบาน เพื่อถวายเป็นพุทธบูชา และ พระราชกุศลแด่พระองภา เพื่อการศึกษาพระธรรม "
 )
 
-# ตรวจสอบประวัติการแชทใน Session State
-if "messages" not in st.session_state:
-    st.session_state["messages"] = [
-        {"role": "assistant", "content": "กระผมคือ ai-prapali นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา มีสิ่งใดให้ร่วมสนทนาหรือให้ข้อมูลเกี่ยวกับหลักธรรม ภาษาบาลี หรือต้องการให้วิเคราะห์ภาพธรรมะไหมครับ?"}
-    ]
-
-# แสดงประวัติการคุยทั้งหมดบนหน้าจอ
+# แสดงประวัติการคุยทั้งหมดบนหน้าจอหลัก
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
-
-# --- 📌 จัดกล่องแชทและปุ่มเครื่องหมายบวกให้อยู่ด้านล่างสุดเสมอ ---
+# --- จัดกล่องแชทและปุ่มเครื่องหมายบวกให้อยู่ด้านล่างสุดเสมอ ---
 input_container = st.container()
-
 uploaded_file = None
 image = None
 
@@ -76,42 +131,39 @@ with input_container:
     with col_chat:
         prompt = st.chat_input("พิมพ์ข้อความคำถามธรรมะหรือบาลีที่นี่...")
 
-
 # --- ส่วนประมวลผลการทำงานเมื่อกดส่งคำถาม ---
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
+    save_chat_history()
     
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        
-        # มัดรวมข้อมูลอินพุต (ภาพ + ข้อความคำถาม)
         content_parts = []
         if image is not None:
             content_parts.append(image)
         content_parts.append(prompt)
         
         with st.spinner("ai-prapali กำลังประมวลผลคำตอบ..."):
-            # ใช้ระบบสลับโหมดอัตโนมัติ (Fallback) เพื่อป้องกันโค้ดล่มจากเวอร์ชันของตัวแปลงภาษา
             try:
-                # แผน A: ทดลองเปิดตัวค้นหาข้อมูลแบบไดนามิกตัวล่าสุด
+                # แผน A
                 model = genai.GenerativeModel(
-                    model_name="gemini-2.5-flash",
+                    model_name="gemini-3.5-flash",
                     system_instruction=SYSTEM_PROMPT,
                     tools=[{"google_search": {}}]
                 )
                 response = model.generate_content(content_parts)
             except Exception:
                 try:
-                    # แผน B: หากแผน A ไม่ผ่าน ให้ถอยมาใช้โครงสร้างแบบคลาสสิกเดิม
+                    # แผน B
                     model = genai.GenerativeModel(
-                        model_name="gemini-2.5-flash",
+                        model_name="gemini-3.1-flash",
                         system_instruction=SYSTEM_PROMPT,
                         tools=['google_search_retrieval']
                     )
                     response = model.generate_content(content_parts)
                 except Exception:
-                    # แผน C: ปลอดภัยสุด หากระบบค้นหาพังทั้งหมด ให้รันโหมดแชทธรรมดาเพื่อไม่ให้แอปพลิเคชันค้างตัวหนังสือสีแดง
+                    # แผน C
                     model = genai.GenerativeModel(
                         model_name="gemini-2.5-flash",
                         system_instruction=SYSTEM_PROMPT
@@ -123,6 +175,10 @@ if prompt:
         st.session_state.messages.append({"role": "assistant", "content": msg})
         st.chat_message("assistant").write(msg)
         
+        # 💾 บันทึกประวัติลงไฟล์ของยูสเซอร์ และบันทึก Log สำหรับนำไป Train prapali v1 ต่อ
+        save_chat_history()
+        log_data_for_prapali_v1(prompt, msg)
+        
         st.rerun()
         
     except Exception as e:
@@ -133,7 +189,7 @@ st.write("")
 st.markdown(
     "<div style='text-align: center; color: gray; font-size: 0.85rem; padding-top: 20px; padding-bottom: 60px;'>"
     "© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน<br>"
-    "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระองค์ภา เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
+    "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระเจ้าลูกเธอเจ้าฟ้าพัชรกิตติยาภาฯ เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
     "</div>", 
     unsafe_allow_html=True
 )
