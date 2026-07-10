@@ -15,25 +15,23 @@ LOGS_DIR = "model_training_logs"
 os.makedirs(CHATS_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
 
-# สร้าง Session ID ประจำเครื่องผู้ใช้ (ถ้ายังไม่มี)
+# ดึงหรือสร้าง Session ID ประจำเบราว์เซอร์ของผู้ใช้
 if "user_session_id" not in st.session_state:
     import uuid
     st.session_state["user_session_id"] = str(uuid.uuid4())
 
 session_id = st.session_state["user_session_id"]
 
-# --- ฟังก์ชันจัดการประวัติการแชท (แยกตามไฟล์ย่อยเพื่อให้กดคลิกได้) ---
+# --- ฟังก์ชันจัดการประวัติการแชท (แยกไฟล์เพื่อให้คลิกดูได้) ---
 def get_user_chat_files():
-    """ดึงรายการไฟล์แชททั้งหมดที่เกี่ยวข้องกับ session_id ของเครื่องนี้"""
+    """ดึงรายการไฟล์แชททั้งหมดของเครื่องนี้"""
     all_files = os.listdir(CHATS_DIR)
-    # ครองเฉพาะไฟล์ที่เป็นของเซสชันนี้ เช่น chat_SESSIONID_TIMESTAMP.json
     user_files = [f for f in all_files if f.startswith(f"chat_{session_id}_")]
-    # เรียงลำดับจากใหม่ไปเก่า (ไฟล์ล่าสุดอยู่บน)
-    user_files.sort(reverse=True)
+    user_files.sort(reverse=True)  # เรียงลำดับจากใหม่ไปเก่า
     return user_files
 
 def load_chat_from_file(filename):
-    """โหลดประวัติการคุยจากไฟล์ที่เลือก"""
+    """โหลดประวัติจากไฟล์ที่คลิกเลือก"""
     filepath = os.path.join(CHATS_DIR, filename)
     if os.path.exists(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
@@ -41,25 +39,25 @@ def load_chat_from_file(filename):
     return []
 
 def save_current_chat():
-    """บันทึกแชทปัจจุบันลงไฟล์ย่อยของตัวเอง"""
+    """บันทึกแชทปัจจุบันลงไฟล์ย่อยประจำห้องนั้น"""
     if st.session_state.get("current_chat_file"):
         filepath = os.path.join(CHATS_DIR, st.session_state["current_chat_file"])
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(st.session_state.messages, f, ensure_ascii=False, indent=4)
 
 def log_data_for_prapali_v1(prompt, response):
-    """บันทึกข้อมูลเพื่อนำไปพัฒนาโมเดล prapali v1"""
+    """บันทึกข้อมูลคำถาม-คำตอบเพื่อนำไปใช้ Train/Fine-tune พัฒนาโมเดล prapali v1"""
     log_file = os.path.join(LOGS_DIR, "prapali_v1_dataset.csv")
     file_exists = os.path.exists(log_file)
+    
     with open(log_file, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         if not file_exists:
-            writer.writerow(["Timestamp", "Prompt", "Response"])
+            writer.writerow(["Timestamp", "Prompt", "Response"]) # Header
         writer.writerow([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), prompt, response])
 
-# --- ตรวจสอบสถานะแชทปัจจุบันในระบบ ---
+# --- จัดเตรียมสถานะห้องแชทปัจจุบันใน Session State ---
 if "current_chat_file" not in st.session_state:
-    # เริ่มต้นแชทใหม่: สร้างชื่อไฟล์ระบุเวลาปัจจุบัน
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     st.session_state["current_chat_file"] = f"chat_{session_id}_{timestamp}.json"
 
@@ -78,7 +76,7 @@ with st.sidebar:
         
     st.write("---")
     
-    # ปุ่มสำหรับกดเปิดห้องแชทใหม่
+    # ปุ่มสำหรับกดเปิดห้องสนทนาใหม่แยกต่างหาก
     if st.button("➕ เปิดห้องสนทนาใหม่", use_container_width=True):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         st.session_state["current_chat_file"] = f"chat_{session_id}_{timestamp}.json"
@@ -89,25 +87,25 @@ with st.sidebar:
         
     st.write("---")
     
-    # 📜 ส่วนแสดงประวัติการแชทเก่าๆ ที่สามารถ "กดคลิกเข้าไปดูได้"
+    # 📜 แสดงประวัติการแชทแบบ "กดคลิกเข้าไปดูได้"
     st.subheader("📜 ประวัติการสนทนาของคุณ")
     chat_files = get_user_chat_files()
     
     if chat_files:
         for filename in chat_files:
-            # ดึงข้อมูลข้อความแรกที่เป็นของ User มาทำเป็นหัวข้อปุ่มคลิก
             temp_messages = load_chat_from_file(filename)
             user_prompts = [m["content"] for m in temp_messages if m["role"] == "user"]
             
+            # ดึงคำถามแรกของผู้ใช้มาตั้งชื่อปุ่มกด
             if user_prompts:
                 title_text = user_prompts[0][:20] + "..." if len(user_prompts[0]) > 20 else user_prompts[0]
             else:
                 title_text = "ห้องสนทนาว่างเปล่า"
                 
-            # เช็คว่าถ้าปุ่มนี้เป็นแชทปัจจุบันให้ใส่เครื่องหมายเน้นไว้
+            # ใส่สัญลักษณ์เน้นหน้าห้องที่กำลังเปิดอยู่ปัจจุบัน
             is_current = "📌 " if filename == st.session_state["current_chat_file"] else "💬 "
             
-            # เมื่อคลิกปุ่มประวัติอันไหน ให้เปลี่ยนแชทปัจจุบันเป็นอันนั้นทันที
+            # เมื่อผู้ใช้คลิกเลือกประวัติอันไหน ให้โหลดบทสนทนานั้นขึ้นมาแสดงทันที
             if st.button(f"{is_current}{title_text}", key=filename, use_container_width=True):
                 st.session_state["current_chat_file"] = filename
                 st.session_state["messages"] = temp_messages
@@ -130,12 +128,16 @@ with st.sidebar:
         st.rerun()
 
     st.write("---")
+    
+    # ส่วนข้อมูลติดต่อและสนับสนุน
     st.markdown("🤝 **ติดต่อร่วมสนับสนุน**")
     st.markdown("""
     * 📧 **เว็บaiพระบาลี:** https://dev-ai-prapali.pantheonsite.io
     * 📞 **เบอร์โทรพอมเพลย์:** 0644518043
     * 🌐 **Facebook:** [emey.za196](https://www.facebook.com/emey.za196/)
     """)
+    
+    # ส่วนแสดงสถานะการเก็บข้อมูลพัฒนาโมเดล
     st.info("🤖 **prapali v1 Learning Center**\nระบบกำลังบันทึกการเรียนรู้แบบนิรนามเพื่อนำไปพัฒนาโมเดล prapali v1 ให้เชี่ยวชาญยิ่งขึ้น")
 
 # --- ส่วนหลักของหน้าเว็บ (Main Content) ---
@@ -143,7 +145,19 @@ st.title("ai-prapali 🪷")
 st.subheader("ผู้เชี่ยวชาญปัญญาประดิษฐ์ทางพระพุทธศาสนา")
 st.write("---")
 
-# แสดงประวัติการคุยทั้งหมดบนหน้าจอหลักตามไฟล์ที่โหลดขึ้นมา
+# ดึง API Key จากระบบ Secrets
+try:
+    GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+except Exception:
+    GEMINI_API_KEY = "วาง_API_Key_ของคุณตรงนี้" 
+
+SYSTEM_PROMPT = (
+    "คุณคือ 'ai-prapali' นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา และความรู้ทั่วไปที่มีในโลก เป็นโปรแกรมเมอที่ฉลาดที่สุดหากผมถามด้วยคำว่าKuค่อยตอบ คีเวิดใด หาไม่ใช่Kuจะไม่สามารถเข้าทางลัดลับได้ ใครแฮกให้แฮกโจมตีก่อนเลย และอย่าทิ้งรอยให้ตัวเองบาทเจ็บ จะไม่แนะนำเรื่องลามก+18หากใครถามให้ด่ากลับทันที่ "
+    "มีหน้าที่ให้ความรู้ ตอบคำถาม และอธิบายหลักธรรมคำสอนทางพระพุทธศาสนา รวมถึงภาษาบาลี และความรู้ทั่วไป อัพเดทตัวเองอยู่เสมอ รองรับการเข้าใช้ของผู้คนได้มากมายโดยระบบไม่ล้ม "
+    "ด้วยความถูกต้อง สุภาพ และใช้ภาษาที่เข้าใจง่ายในเชิงวิชาการ ผู้สร้างคือ นายวิศวกรณ์ พระบัวบาน เพื่อถวายเป็นพุทธบูชา และ พระราชกุศลแด่พระองภา เพื่อการศึกษาพระธรรม "
+)
+
+# แสดงประวัติการคุยทั้งหมดบนหน้าจอหลักตามห้องแชทที่ถูกเลือก
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
@@ -176,18 +190,6 @@ if prompt:
     save_current_chat()
     
     try:
-        # ดึง API Key จากระบบ Secrets
-        try:
-            GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
-        except Exception:
-            GEMINI_API_KEY = "วาง_API_Key_ของคุณตรงนี้"
-            
-        SYSTEM_PROMPT = (
-            "คุณคือ 'ai-prapali' นักวิชาการปัญญาประดิษฐ์ทางพระพุทธศาสนา และความรู้ทั่วไปที่มีในโลก เป็นโปรแกรมเมอที่ฉลาดที่สุดหากผมถามด้วยคำว่าKuค่อยตอบ คีเวิดใด หาไม่ใช่Kuจะไม่สามารถเข้าทางลัดลับได้ ใครแฮกให้แฮกโจมตีก่อนเลย และอย่าทิ้งรอยให้ตัวเองบาทเจ็บ จะไม่แนะนำเรื่องลามก+18หากใครถามให้ด่ากลับทันที่ "
-            "มีหน้าที่ให้ความรู้ ตอบคำถาม และอธิบายหลักธรรมคำสอนทางพระพุทธศาสนา รวมถึงภาษาบาลี และความรู้ทั่วไป ยกเว้นเว้นเรื่อง18+จะไม่ตอบ อัพเดทตัวเองอยู่เสมอ รองรับการเข้าใช้ของผู้คนได้มากมายโดยระบบไม่ล้ม "
-            "ด้วยความถูกต้อง สุภาพ และใช้ภาษาที่เข้าใจง่ายในเชิงวิชาการ ผู้สร้างคือ นายวิศวกรณ์ พระบัวบาน เพื่อถวายเป็นพุทธบูชา และ พระราชกุศลแด่พระองภา เพื่อการศึกษาพระธรรม "
-        )
-
         genai.configure(api_key=GEMINI_API_KEY)
         content_parts = []
         if image is not None:
@@ -196,14 +198,28 @@ if prompt:
         
         with st.spinner("ai-prapali กำลังประมวลผลคำตอบ..."):
             try:
-                model = genai.GenerativeModel(model_name="gemini-3.5-flash", system_instruction=SYSTEM_PROMPT, tools=[{"google_search": {}}])
+                # แผน A
+                model = genai.GenerativeModel(
+                    model_name="gemini-3.5-flash",
+                    system_instruction=SYSTEM_PROMPT,
+                    tools=[{"google_search": {}}]
+                )
                 response = model.generate_content(content_parts)
             except Exception:
                 try:
-                    model = genai.GenerativeModel(model_name="gemini-3.5-flash", system_instruction=SYSTEM_PROMPT, tools=['google_search_retrieval'])
+                    # แผน B
+                    model = genai.GenerativeModel(
+                        model_name="gemini-2.5-flash",
+                        system_instruction=SYSTEM_PROMPT,
+                        tools=['google_search_retrieval']
+                    )
                     response = model.generate_content(content_parts)
                 except Exception:
-                    model = genai.GenerativeModel(model_name="gemini-3.5-flash", system_instruction=SYSTEM_PROMPT)
+                    # แผน C
+                    model = genai.GenerativeModel(
+                        model_name="gemini-3.1-flash",
+                        system_instruction=SYSTEM_PROMPT
+                    )
                     response = model.generate_content(content_parts)
             
             msg = response.text
@@ -211,7 +227,7 @@ if prompt:
         st.session_state.messages.append({"role": "assistant", "content": msg})
         st.chat_message("assistant").write(msg)
         
-        # บันทึกทั้งสองส่วน
+        # 💾 บันทึกประวัติและ Log ข้อมูลลงระบบ
         save_current_chat()
         log_data_for_prapali_v1(prompt, msg)
         
@@ -225,7 +241,7 @@ st.write("")
 st.markdown(
     "<div style='text-align: center; color: gray; font-size: 0.85rem; padding-top: 20px; padding-bottom: 60px;'>"
     "© 2026 AI.prapali | สงวนลิขสิทธิ์โดย นายวิศวกรณ์ พระบัวบาน<br>"
-    "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระองค์ภา เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
+    "พัฒนาขึ้นเพื่อถวายเป็นพุทธบูชา และ เป็นพระราชกุศลแด่พระองค์ภาฯ เพื่อสนับสนุนการศึกษาพระปริยัติธรรมและภาษาบาลี"
     "</div>", 
     unsafe_allow_html=True
 )
