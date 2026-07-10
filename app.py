@@ -209,7 +209,7 @@ if prompt:
                 try:
                     # แผน B
                     model = genai.GenerativeModel(
-                        model_name="gemini-2.5-flash",
+                        model_name="gemini-3.5-flash",
                         system_instruction=SYSTEM_PROMPT,
                         tools=['google_search_retrieval']
                     )
@@ -217,7 +217,7 @@ if prompt:
                 except Exception:
                     # แผน C
                     model = genai.GenerativeModel(
-                        model_name="gemini-3.1-flash",
+                        model_name="gemini-3.5-flash",
                         system_instruction=SYSTEM_PROMPT
                     )
                     response = model.generate_content(content_parts)
