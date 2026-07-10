@@ -148,7 +148,7 @@ if prompt:
             try:
                 # แผน A
                 model = genai.GenerativeModel(
-                    model_name="gemini-2.5-flash",
+                    model_name="gemini-3.5-flash",
                     system_instruction=SYSTEM_PROMPT,
                     tools=[{"google_search": {}}]
                 )
@@ -157,7 +157,7 @@ if prompt:
                 try:
                     # แผน B
                     model = genai.GenerativeModel(
-                        model_name="gemini-3.5-flash",
+                        model_name="gemini-3.1-flash",
                         system_instruction=SYSTEM_PROMPT,
                         tools=['google_search_retrieval']
                     )
